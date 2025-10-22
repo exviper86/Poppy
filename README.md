@@ -8,6 +8,9 @@
 
 ## Windows System Notification Utility
 
+![Downloads](https://img.shields.io/github/downloads/exviper86/poppy/total)
+![GitHub Release](https://img.shields.io/github/v/release/exviper86/poppy)
+
 ---
 
 A lightweight, elegant utility for Windows 10/11 that displays modern fluent flyout popups 
@@ -16,7 +19,7 @@ for keyboard layout changes, volume adjustments, media playback and has an advan
 ![Keyboard Popup](screenshots/popup.png)  
 *Keyboard layout change notification*
 
-![Media + Volume Popup](screenshots/popup media.png)  
+![Media + Volume Popup](screenshots/popup%20media.png)  
 *Volume control + media info*
 
 ## ✨ Features
