@@ -61,7 +61,7 @@ Poppy enhances your Windows experience with customizable notifications:
 
 ---
 
-- Go to the latest release on the Releases page
+- Go to the [latest release on the Releases page](https://github.com/exviper86/poppy/releases/latest).
 - Download and run Poppy.exe file
 - Application is portable
 
