@@ -1,0 +1,8 @@
+# Poppy — desktop notification utility for Windows
+# Direct runtime dependencies only
+
+PyQt6>=6.5
+qasync>=0.28.0
+keyboard>=0.13.5
+pywin32>=300
+https://github.com/AndreMiras/pycaw/archive/develop.zip
