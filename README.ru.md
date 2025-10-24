@@ -8,18 +8,19 @@
 
 ## Системная утилита всплывающих уведомлений для Windows
 
-![Downloads](https://img.shields.io/github/downloads/exviper86/poppy/total)
-![GitHub Release](https://img.shields.io/github/v/release/exviper86/poppy)
-
 ---
 
 Лёгкая и элегантная утилита для Windows 10/11, которая отображает современные красивые всплывающие подсказки 
 при смене раскладки клавиатуры, регулировке громкости, воспроизведении медиа и имеет продвинутую систему переключении аудиоустройств.
 
-![Уведомление о раскладке](screenshots/popup.png)  
+<img src="screenshots/language%20light.png" height="149">
+<img src="screenshots/language%20dark.png" height="149">
+
 *Уведомление при смене раскладки*
 
-![Управление громкостью + медиа](screenshots/popup%20media.png)  
+<img src="screenshots/media%20light.png" height="210">
+<img src="screenshots/media%20dark.png" height="210">
+
 *Управление громкостью + информация о треке*
 
 ## ✨ Возможности

@@ -347,18 +347,6 @@ class MediaInfoPopup(BasePopup):
         except Exception as e:
             print(f"[MediaInfoPopup] Ошибка чтения обложки: {e}")
             return None
-    # async def _read_thumbnail(self, thumbnail, timeout=2.0):
-    #     try:
-    #         stream = await asyncio.wait_for(thumbnail.open_read_async(), timeout=timeout)
-    #         buf = Buffer(stream.size)
-    #         buf = await asyncio.wait_for(stream.read_async(buf, stream.size, InputStreamOptions.READ_AHEAD), timeout=timeout)
-    #         return bytes(buf)
-    #     except asyncio.TimeoutError:
-    #         print("[MediaInfoPopup] Таймаут чтения обложки")
-    #         return None
-    #     except Exception as e:
-    #         print(f"[MediaInfoPopup] Ошибка чтения обложки: {e}")
-    #         return None
 
     def _set_cover_from_bytes(self, image_data: bytes):
         """Принимает raw bytes изображения и отображает обложку с закруглёнными краями."""
@@ -428,7 +416,7 @@ class MediaInfoPopup(BasePopup):
                 color = QColor("white")
             else:
                 color = QColor("black")
-            color.setAlpha(15)
+            color.setAlpha(20)
             self.timeline.set_progress_color(color)
         else:
             timeline_color.setAlpha(35)
