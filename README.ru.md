@@ -11,13 +11,11 @@
 Лёгкая и элегантная утилита для Windows 10/11, которая отображает современные красивые всплывающие подсказки 
 при смене раскладки клавиатуры, регулировке громкости, воспроизведении медиа и имеет продвинутую систему переключении аудиоустройств.
 
-<img src="screenshots/language%20light.png" height="149">
-<img src="screenshots/language%20dark.png" height="149">
+<img src="screenshots/language%20light.png" height="149"> <img src="screenshots/language%20dark.png" height="149">
 
 *Уведомление при смене раскладки*
 
-<img src="screenshots/media%20light.png" height="210">
-<img src="screenshots/media%20dark.png" height="210">
+<img src="screenshots/media%20light.png" height="210"> ~~~~<img src="screenshots/media%20dark.png" height="210">
 
 *Управление громкостью + информация о треке*
 
