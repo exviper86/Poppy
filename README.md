@@ -84,8 +84,7 @@ This project is licensed under the GNU General Public License v3.0 — see [LICE
 
 >💡 Commercial use: Use in proprietary or commercial applications requires explicit written permission from the author.
 Contact: [exviper86@gmail.com](mailto:exviper86@gmail.com)
-
-
+~~~~
 ## 🆘 Help & Support
 For help, visit the in-app Help section (?) or open an issue on GitHub.
 
