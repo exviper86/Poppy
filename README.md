@@ -11,11 +11,11 @@
 A lightweight, elegant utility for Windows 10/11 that displays modern fluent flyout popups 
 for keyboard layout changes, volume adjustments, media playback and has an advanced audio device switching.
 
-<img src="screenshots/language%20light.png" height="149"> <img src="screenshots/language%20dark.png" height="149">
+<img src="screenshots/language%20light.png" height="149">  <img src="screenshots/language%20dark.png" height="149">
 
 *Keyboard layout change notification*
 
-<img src="screenshots/media%20light.png" height="210"> <img src="screenshots/media%20dark.png" height="210">
+<img src="screenshots/media%20light.png" height="210">  <img src="screenshots/media%20dark.png" height="210">
 
 *Volume control + media info*
 
