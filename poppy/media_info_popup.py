@@ -521,8 +521,8 @@ class MediaInfoPopup(BasePopup):
                 self._playback_info_token = self._session.add_playback_info_changed(self._on_playback_info_changed)
                 if sender:
                     print("_on_current_session_changed")
-                    # if self.isVisible() or self.app.config.media_window_show_on_change:
-                    #     self.app.loop.call_soon_threadsafe(self.show_popup)
+                    if self.isVisible() or self.app.config.media_window_show_on_change:
+                        self.app.loop.call_soon_threadsafe(self.show_popup)
             else:
                 self._media_props_token = None
                 self._playback_info_token = None

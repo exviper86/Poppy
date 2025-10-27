@@ -95,7 +95,7 @@ pyinstaller --onefile --windowed --name Poppy --add-data "poppy/resources;resour
 
 ---
 
-Copyright (C) 2025 Viper
+Copyright (C) 2025 exviper86
 
 Этот проект распространяется под лицензией GNU General Public License v3.0 — см. файл [LICENSE](LICENSE).
 

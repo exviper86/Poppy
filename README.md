@@ -95,7 +95,7 @@ or run build.bat
 
 ---
 
-Copyright (C) 2025 Viper
+Copyright (C) 2025 exviper86
 
 This project is licensed under the GNU General Public License v3.0 — see [LICENSE](LICENSE) for details.
 
