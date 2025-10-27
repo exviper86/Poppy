@@ -8,6 +8,13 @@
 
 ## Системная утилита всплывающих уведомлений для Windows
 
+![Downloads](https://img.shields.io/github/downloads/exviper86/poppy/total)
+![GitHub Release](https://img.shields.io/github/v/release/exviper86/poppy)
+
+[//]: # (![Stars]&#40;https://img.shields.io/github/stars/exviper86/poppy?style=social&#41;)
+
+[//]: # (![Forks]&#40;https://img.shields.io/github/forks/exviper86/poppy?style=social&#41;)
+
 ---
 
 Лёгкая и элегантная утилита для Windows 10/11, которая отображает современные красивые всплывающие подсказки 
