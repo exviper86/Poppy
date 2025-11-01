@@ -137,18 +137,29 @@ class SettingsWindow(QWidget):
         self.keyboard_show_modifiers_cb = QCheckBox("при нажатии клавиш режима")
 
         sound_layout = QHBoxLayout()
-        self.sound_enable_cb = QCheckBox("звуковой эффект")
+        self.sound_enable_cb = QCheckBox("звуковой эффект:")
         self.sound_type_combo = QComboBox()
         self.sound_type_combo.addItems(["звук 1", "звук 2", "звук 3", "звук 4", "звук 5", "звук 6"])
         sound_layout.addWidget(self.sound_enable_cb)
         sound_layout.addWidget(self.sound_type_combo)
         sound_layout.addStretch()
 
+        keyboard_duration_layout = QHBoxLayout()
+        self.keyboard_override_duration_cb = QCheckBox("своя длительность:")
+        self.keyboard_duration_spin = QSpinBox()
+        self.keyboard_duration_spin.setRange(500, 5000)
+        self.keyboard_duration_spin.setSingleStep(100)
+        self.keyboard_duration_spin.setSuffix(" мс")
+        keyboard_duration_layout.addWidget(self.keyboard_override_duration_cb)
+        keyboard_duration_layout.addWidget(self.keyboard_duration_spin)
+        keyboard_duration_layout.addStretch()
+        
         keyboard_left_layout.addWidget(self.keyboard_enable_cb)
         keyboard_left_layout.addWidget(self.keyboard_show_language_cb)
         keyboard_left_layout.addWidget(self.keyboard_show_cursor_cb)
         keyboard_left_layout.addWidget(self.keyboard_show_modifiers_cb)
         keyboard_left_layout.addLayout(sound_layout)
+        keyboard_left_layout.addLayout(keyboard_duration_layout)
         keyboard_left_layout.addStretch()
         
         # Положение — компактная строка
@@ -339,6 +350,9 @@ class SettingsWindow(QWidget):
         self.keyboard_show_language_cb.toggled.connect(config.save_keyboard_window_show_language)
         self.keyboard_show_cursor_cb.toggled.connect(config.save_keyboard_window_show_cursor)
         self.keyboard_show_modifiers_cb.toggled.connect(config.save_keyboard_window_show_modifiers)
+        self.keyboard_override_duration_cb.toggled.connect(config.save_keyboard_window_override_duration)
+        self.keyboard_override_duration_cb.toggled.connect(self.keyboard_duration_spin.setEnabled)
+        self.keyboard_duration_spin.valueChanged.connect(config.save_keyboard_window_duration)
         self.keyboard_position_grid.positionChanged.connect(config.save_keyboard_window_position)
 
         self.volume_enable_cb.toggled.connect(config.save_volume_window_enable)
@@ -386,6 +400,8 @@ class SettingsWindow(QWidget):
         self.keyboard_show_language_cb.setChecked(config.keyboard_window_show_language)
         self.keyboard_show_cursor_cb.setChecked(config.keyboard_window_show_cursor)
         self.keyboard_show_modifiers_cb.setChecked(config.keyboard_window_show_modifiers)
+        self.keyboard_override_duration_cb.setChecked(config.keyboard_window_override_duration)
+        self.keyboard_duration_spin.setValue(config.keyboard_window_duration)
         self.keyboard_position_grid.set_position(config.keyboard_window_position)
 
         self.volume_enable_cb.setChecked(config.volume_window_enable)
@@ -415,6 +431,7 @@ class SettingsWindow(QWidget):
         self._on_media_enable(config.media_window_enable)
         self.sound_type_combo.setEnabled(config.sound)
         self.keyboard_show_cursor_cb.setEnabled(config.keyboard_window_show_language)
+        self.keyboard_duration_spin.setEnabled(config.keyboard_window_override_duration)
         
     def _on_keyboard_enable(self, enabled):
         for widget in (
@@ -477,6 +494,7 @@ class SettingsWindow(QWidget):
         self.keyboard_show_cursor_cb.setText(loc.tr(trans.keyboard_show_cursor))  # смена языка рядом с курсором
         self.keyboard_show_modifiers_cb.setText(loc.tr(trans.keyboard_show_locks))  # при нажатии клавиш режима
         self.sound_enable_cb.setText(loc.tr(trans.sound_enable))  # звуковой эффект
+        self.keyboard_override_duration_cb.setText(loc.tr(trans.override_duration)) # своя длительность
 
         # Звуки
         self.sound_type_combo.setItemText(0, loc.tr(trans.sound_type_1))

@@ -9,6 +9,8 @@ class Config:
         self.keyboard_window_show_language = self._load_keyboard_window_show_language()
         self.keyboard_window_show_cursor = self._load_keyboard_window_show_cursor() 
         self.keyboard_window_show_modifiers = self._load_keyboard_window_show_modifiers()
+        self.keyboard_window_override_duration = self._load_keyboard_window_override_duration()
+        self.keyboard_window_duration = self._load_keyboard_window_duration()
         self.keyboard_window_position = self._load_keyboard_window_position()
         self.volume_window_enable = self._load_volume_window_enable()
         self.volume_window_position = self._load_volume_window_position()
@@ -84,6 +86,20 @@ class Config:
     def save_keyboard_window_show_modifiers(self, enabled):
         self.keyboard_window_show_modifiers = enabled
         self._save_setting("KeyboardWindowShowModifiers", 1 if enabled else 0)
+    
+    def _load_keyboard_window_override_duration(self):
+        return self._load_setting("KeyboardWindowOverrideDuration", 0)
+    
+    def save_keyboard_window_override_duration(self, enabled):
+        self.keyboard_window_override_duration = enabled
+        self._save_setting("KeyboardWindowOverrideDuration", 1 if enabled else 0)
+    
+    def _load_keyboard_window_duration(self):
+        return self._load_setting("KeyboardWindowDuration", 2500)
+    
+    def save_keyboard_window_duration(self, duration):
+        self.keyboard_window_duration = duration
+        self._save_setting("KeyboardWindowDuration", duration)
     
     def _load_keyboard_window_position(self):
         return self._load_setting("KeyboardWindowPosition", "center")

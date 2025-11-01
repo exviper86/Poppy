@@ -50,3 +50,6 @@ class KeyboardPopup(BasePopup):
             self.app.sound_manager.play_sound()
         
         self._show_popup()
+        
+    def _get_duration(self):
+        return self.app.config.keyboard_window_duration if self.app.config.keyboard_window_override_duration else self.app.config.popup_duration

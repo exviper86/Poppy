@@ -171,7 +171,7 @@ class BasePopup(QWidget):
     
     def _on_show_animation_end(self):
         self.is_active = True
-        self.hide_timer.start(self.app.config.popup_duration)
+        self.hide_timer.start(self._get_duration())
             
     def hide_animation(self):
         is_hovered = self.stay_on_hover and self.is_mouse_over
@@ -197,5 +197,8 @@ class BasePopup(QWidget):
     def leaveEvent(self, event):
         super().leaveEvent(event)
         if self.is_active and self.stay_on_hover:
-            self.hide_timer.start(self.app.config.popup_duration)
+            self.hide_timer.start(self._get_duration())
         self.is_mouse_over = False
+        
+    def _get_duration(self):
+        return self.app.config.popup_duration

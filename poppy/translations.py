@@ -117,6 +117,7 @@ class Translations():
         self.sound_type_4 = "sound_type_4"
         self.sound_type_5 = "sound_type_5"
         self.sound_type_6 = "sound_type_6"
+        self.override_duration = "override_duration"
 
         self._add(self.lang_en, self.keyboard_enable, "Show keyboard popup")
         self._add(self.lang_ru, self.keyboard_enable, "Показывать окно клавиатуры")
@@ -130,8 +131,8 @@ class Translations():
         self._add(self.lang_en, self.keyboard_show_locks, "on lock keys press")
         self._add(self.lang_ru, self.keyboard_show_locks, "при нажатии клавиш режима")
 
-        self._add(self.lang_en, self.sound_enable, "sound effect")
-        self._add(self.lang_ru, self.sound_enable, "звуковой эффект")
+        self._add(self.lang_en, self.sound_enable, "sound effect:")
+        self._add(self.lang_ru, self.sound_enable, "звуковой эффект:")
 
         self._add(self.lang_en, self.sound_type_1, "sound 1")
         self._add(self.lang_ru, self.sound_type_1, "звук 1")
@@ -145,7 +146,10 @@ class Translations():
         self._add(self.lang_ru, self.sound_type_5, "звук 5")
         self._add(self.lang_en, self.sound_type_6, "sound 6")
         self._add(self.lang_ru, self.sound_type_6, "звук 6")
-
+        
+        self._add(self.lang_en, self.override_duration, "override duration:")
+        self._add(self.lang_ru, self.override_duration, "своя длительность:")
+        
         # Громкость
         self.volume_enable = "volume_enable"
         self.volume_show_media = "volume_show_media"
@@ -338,7 +342,8 @@ class Translations():
         self._add(self.lang_ru, self.help_keyboard,
                   "• Включите «Показывать окно клавиатуры», чтобы видеть уведомления о смене языка и нажатии клавиш режима (Caps Lock, Num Lock и др.).\n"
                   "• Опция «смена языка рядом с курсором» показывает попап в текущей позиции курсора.\n"
-                  "• Звуковые эффекты можно включить и выбрать один из 6 вариантов."
+                  "• Звуковые эффекты можно включить и выбрать один из 6 вариантов.\n"
+                  "• Длительность показа окна можно переопределить."
                   )
         self._add(self.lang_ru, self.help_volume,
                   "• Окно громкости появляется при изменении уровня звука с клавиатуры.\n"
@@ -383,7 +388,8 @@ class Translations():
         self._add(self.lang_en, self.help_keyboard,
                   "• Enable 'Show keyboard popup' to see notifications for layout changes and mode key presses (Caps Lock, Num Lock, etc.).\n"
                   "• 'language near cursor' displays the popup at the current cursor position.\n"
-                  "• Sound effects can be enabled and selected from 6 available options."
+                  "• Sound effects can be enabled and selected from 6 available options.\n"
+                  "• Popup duration can be overriden."
                   )
         self._add(self.lang_en, self.help_volume,
                   "• The volume popup appears when adjusting sound level using the keyboard.\n"

@@ -79,3 +79,6 @@ class KeyboardPopupCursor(BasePopup):
             y = screen.top()
     
         self.move(x, y)
+
+    def _get_duration(self):
+        return self.app.config.keyboard_window_duration if self.app.config.keyboard_window_override_duration else self.app.config.popup_duration
