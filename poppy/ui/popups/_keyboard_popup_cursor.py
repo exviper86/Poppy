@@ -1,5 +1,3 @@
-# keyboard_popup.py
-
 # Copyright (C) 2025 exviper86
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
@@ -13,33 +11,36 @@
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QFont, QCursor
 from PyQt6.QtWidgets import QVBoxLayout, QLabel, QApplication
-from base_popup import BasePopup
+from ._base_popup import BasePopup
+from poppy.config import config
 
 class KeyboardPopupCursor(BasePopup):
-    def create_content(self, background_widget):
+    def _create_content(self, background_widget):
         content_layout = QVBoxLayout(background_widget)
         content_layout.setContentsMargins(0, 0, 0, 2)
 
-        self.label_main = QLabel()
-        self.label_main.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.label_main.setFont(QFont("Segoe UI Variable", 12))
-        self.label_main.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        content_layout.addWidget(self.label_main)
+        self._label_main = QLabel()
+        self._label_main.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._label_main.setFont(QFont("Segoe UI Variable", 12))
+        self._label_main.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        content_layout.addWidget(self._label_main)
 
-        self.timer = QTimer()
-        self.timer.timeout.connect(self._move_to_cursor)
+        self._timer = QTimer()
+        self._timer.timeout.connect(self._move_to_cursor)
 
-    def apply_theme_content(self, colors):
-        self.label_main.setStyleSheet(f"color: {colors['accent']};")
+    def _apply_theme_content(self, colors):
+        self._label_main.setStyleSheet(f"color: {colors['accent']};")
 
-    def show_popup(self, main_text):
-        if not self.app.config.keyboard_window_enable:
+    def _update_screen_position(self):
+        self._screen_position = None
+    
+    def show_popup(self, main_text: str):
+        if not config.keyboard_window.enable.value:
             return
         
-        self.label_main.setText(main_text)
+        self._label_main.setText(main_text)
 
-        if self.app.config.keyboard_window_show_cursor:
-            self.app.sound_manager.play_sound()
+        self._app.sound_manager.play_sound()
         
         self._show_popup()
         
@@ -47,12 +48,12 @@ class KeyboardPopupCursor(BasePopup):
         screen = QApplication.primaryScreen()
         framerate = screen.refreshRate() if screen else 60
         interval_ms = max(1, int(1000 / framerate))
-        self.timer.setInterval(interval_ms)
-        self.timer.start()
+        self._timer.setInterval(interval_ms)
+        self._timer.start()
     
     def hideEvent(self, a0):
         super().hideEvent(a0)
-        self.timer.stop()
+        self._timer.stop()
     
     def _move_to_cursor(self):
         cursor_pos = QCursor.pos()  # глобальная позиция курсора
@@ -81,4 +82,4 @@ class KeyboardPopupCursor(BasePopup):
         self.move(x, y)
 
     def _get_duration(self):
-        return self.app.config.keyboard_window_duration if self.app.config.keyboard_window_override_duration else self.app.config.popup_duration
+        return config.keyboard_window.duration.value if config.keyboard_window.override_duration.value else config.common.popup_duration.value

@@ -1,4 +1,4 @@
-# tray_manager.py
+from typing import Optional
 
 # Copyright (C) 2025 exviper86
 #
@@ -11,31 +11,35 @@
 # You should have received a copy of the GNU General Public License along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from PyQt6.QtWidgets import QSystemTrayIcon, QMenu
-from PyQt6.QtGui import QIcon, QAction
-from utils import get_resource_path, get_theme_colors, color_with_alpha, strip_audio_name
-from translations import localizer as loc, translations as trans
+from PyQt6.QtGui import QIcon, QAction, QFont
+from .utils import Utils
+from .config import config
+from .translations import localizer as loc, translations as trans
 
 class TrayManager:
-    def __init__(self, app):
-        self.app = app  # QApplication
-        self.tray_icon = None
+    def __init__(self):
+        from .app import App
+        self._app = App.instance()
         
-        self.create_tray_icon()
+        self._tray_icon: Optional[QSystemTrayIcon] = None
+
+        self._create_tray_icon()
         
         self._update_text()
         loc.language_changed.connect(self._update_text)
     
-    def create_tray_icon(self):
-        icon_path = get_resource_path('icon.ico')
-        tray_icon = QSystemTrayIcon(QIcon(icon_path), self.app)
+    def _create_tray_icon(self):
+        icon_path = Utils.get_resource_path('icon.ico')
+        tray_icon = QSystemTrayIcon(QIcon(icon_path), self._app)
         tray_icon.setToolTip("Poppy")
 
         # Создаём меню
         menu = QMenu()
+        menu.setFont(QFont("Segoe UI", 10))
         
         # Основной пункт: Настройки
         self.settings_action = menu.addAction("Настройки")
-        self.settings_action.triggered.connect(self.app.show_settings_window)
+        self.settings_action.triggered.connect(self._app.show_settings_window)
         
         # Переключение устройства
         self.audio_menu = QMenu("Аудио устройство", menu)
@@ -53,12 +57,12 @@ class TrayManager:
         # Обработка кликов по иконке
         tray_icon.activated.connect(self.on_tray_activated)
 
-        self.tray_icon = tray_icon
-        self.tray_icon.show()
+        self._tray_icon = tray_icon
+        self._tray_icon.show()
     
     def _update_audio_menu(self):
         # Сначала скроем/покажем само подменю в зависимости от настройки
-        should_show = self.app.config.audio_switch_tray
+        should_show = config.audio_switch.tray.value
         self.audio_menu_action.setVisible(should_show)
     
         if not should_show:
@@ -68,24 +72,24 @@ class TrayManager:
         self.audio_menu.clear()
     
         # Получаем устройства и настройки
-        devices = self.app.audio_manager.get_all_output_devices()
-        switch_devices = self.app.config.audio_switch_devices
+        devices = self._app.audio_manager.get_all_output_devices()
+        switch_devices = config.audio_switch.devices.value
 
         switch_devices_enables = {dev["id"]: dev["on"] for dev in switch_devices}
     
         for device in devices:
             device_id = device["id"]
             
-            if self.app.config.audio_switch_select and not switch_devices_enables.get(device_id, False):
+            if config.audio_switch.select.value and not switch_devices_enables.get(device_id, False):
                 continue
     
             device_name = device["name"]
-            if not self.app.config.audio_switch_tray_full_name:
-                device_name = strip_audio_name(device_name)
+            if not config.audio_switch.tray_full_name.value:
+                device_name = Utils.strip_audio_name(device_name)
             action = QAction(device_name, self.audio_menu)
             action.setCheckable(True)
             try:
-                if self.app.audio_manager.get_device_name() == device["name"]:
+                if self._app.audio_manager.get_device_name() == device["name"]:
                     action.setChecked(True)
             except Exception as e:
                 print(f"Ошибка получения имени устройства: {e}")
@@ -99,13 +103,13 @@ class TrayManager:
 
     def _on_audio_switch(self, device_id):
         try:
-            self.app.audio_manager.switch_device(device_id)
+            self._app.audio_manager.switch_device(device_id)
         except Exception as e:
             print(f"Ошибка переключения устройства: {e}")
     
     def on_tray_activated(self, reason):
         if reason == QSystemTrayIcon.ActivationReason.Trigger:
-            self.app.show_settings_window()
+            self._app.show_settings_window()
             return 
         
         if reason != QSystemTrayIcon.ActivationReason.Context:
@@ -113,8 +117,8 @@ class TrayManager:
         
         self._update_audio_menu()
         
-        colors = get_theme_colors()
-        self.tray_icon.contextMenu().setStyleSheet(f"""
+        colors = Utils.get_theme_colors()
+        self._tray_icon.contextMenu().setStyleSheet(f"""
             QMenu {{
                 border: 1px solid {colors['border']};
                 background-color: {colors['bg']};
@@ -128,11 +132,11 @@ class TrayManager:
             }}
             QMenu::item:selected {{
                 border-radius: 4px;
-                background-color: {color_with_alpha(colors['border'], 175)};
+                background-color: {Utils.color_with_alpha(colors['border'], 175)};
             }}
             QMenu::item:pressed {{
                 border-radius: 4px;
-                background-color: {color_with_alpha(colors['text'], 50)};
+                background-color: {Utils.color_with_alpha(colors['text'], 50)};
             }}
             QMenu::right-arrow {{
                 right: 4px;
@@ -143,8 +147,8 @@ class TrayManager:
         """)
 
     def exit_app(self):
-        self.tray_icon.hide()
-        self.app.shutdown()
+        self._tray_icon.hide()
+        self._app.shutdown()
 
     def _update_text(self):
         self.settings_action.setText(loc.tr(trans.settings))

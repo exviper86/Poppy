@@ -1,5 +1,3 @@
-# localization.py
-
 from typing import Dict
 from PyQt6.QtCore import QObject, pyqtSignal
 

@@ -1,56 +1,96 @@
-# language_handler.py
-
-import subprocess
 import ctypes
+import win32api
 user32 = ctypes.windll.user32
 
-class LanguageHandler():
-    def get_layout_id(self):
-        def get_window_class(hwnd):
-            try:
-                buf = ctypes.create_unicode_buffer(256)
-                user32.GetClassNameW(hwnd, buf, 256)
-                return buf.value
-            except:
-                return "<error>"
-        
-        hwnd = user32.GetForegroundWindow()
-        if hwnd == 0:
-            return self._get_layout_alt()
-        
-        window_class = get_window_class(hwnd)
-        #print(window_class)
-        if window_class in self._exception_windows:
-            return self._get_layout_alt()
-        
-        thread_id = user32.GetWindowThreadProcessId(hwnd, None)
-        layout_id = user32.GetKeyboardLayout(thread_id)
+from ctypes import wintypes
 
-        return layout_id & 0xFFFF
-    
-    def get_name(self, lang_id):
-        return self._lang_names.get(lang_id, "Unknown")
-    
-    def get_code(self, lang_id):
-        return self._lang_native_codes.get(lang_id, "--")
-    
-    def _get_layout_alt(self):
+WM_INPUTLANGCHANGEREQUEST = 0x0050
+
+class GUITHREADINFO(ctypes.Structure):
+    _fields_ = [
+        ("cbSize", wintypes.DWORD),
+        ("flags", wintypes.DWORD),
+        ("hwndActive", wintypes.HWND),
+        ("hwndFocus", wintypes.HWND),
+        ("hwndCapture", wintypes.HWND),
+        ("hwndMenuOwner", wintypes.HWND),
+        ("hwndMoveSize", wintypes.HWND),
+        ("hwndCaret", wintypes.HWND),
+        ("rcCaret", wintypes.RECT),
+    ]
+
+class LanguageHandler:
+    def get_all_layouts(self) -> list[int]:
         try:
-            cmd = [
-                "powershell", "-Command",
-                """Add-Type -AssemblyName System.Windows.Forms; 
-                [System.Windows.Forms.InputLanguage]::CurrentInputLanguage.Culture.LCID"""
-            ]
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=0.5, creationflags=subprocess.CREATE_NO_WINDOW)
-            if result.returncode == 0:
-                return int(result.stdout.strip())
-            return None
+            return [layout_id & 0xFFFF for layout_id in win32api.GetKeyboardLayoutList()]
         except Exception as e:
-            print(f"[LanguageHandler] Ошибка при получении раскладки: {e}")
-            return None
+            print(f"[LanguageHandler] Ошибка получения всех layout_id: {e}")
+            return []
     
-    _exception_windows = ["Notepad", "ApplicationFrameWindow", "XamlExplorerHostIslandWindow"]
+    def get_layout(self) -> int:
+        try:
+            hwnd_fg = user32.GetForegroundWindow()
+            if not hwnd_fg:
+                print("[LanguageHandler] Нет foreground window")
+                return 0
 
+            target_thread_id = user32.GetWindowThreadProcessId(hwnd_fg, None)
+
+            gti = GUITHREADINFO()
+            gti.cbSize = ctypes.sizeof(GUITHREADINFO)
+            if not user32.GetGUIThreadInfo(target_thread_id, ctypes.byref(gti)):
+                print("[LanguageHandler] Ошибка получения GetGUIThreadInfo")
+                return 0
+
+            hwnd = None
+            if gti.hwndCaret:
+                hwnd = gti.hwndCaret
+            elif gti.hwndFocus:
+                hwnd = gti.hwndFocus
+            elif gti.hwndActive:
+                hwnd = gti.hwndActive
+
+            if hwnd:
+                layout_thread_id = user32.GetWindowThreadProcessId(hwnd, None)
+            else:
+                layout_thread_id = target_thread_id
+
+            hkl = user32.GetKeyboardLayout(layout_thread_id)
+            return hkl & 0xFFFF
+
+        except Exception as e:
+            print(f"[LanguageHandler] Ошибка получения layout_id: {e}")
+            return 0
+
+    def set_layout(self, layout: int):
+        try:
+            hwnd_fg = user32.GetForegroundWindow()
+            if not hwnd_fg:
+                print("[LanguageHandler] Нет foreground window")
+                return
+            
+            user32.PostMessageW(hwnd_fg, WM_INPUTLANGCHANGEREQUEST, 0, layout)
+        except Exception as e:
+            print(f"[LanguageHandler] Ошибка установки layout_id: {e}")
+    
+    def set_next_layout(self, current_layout: int) -> int:
+        try:
+            layouts = self.get_all_layouts()
+            current_layout_index = layouts.index(current_layout)
+            next_layout_index = (current_layout_index + 1) % len(layouts)
+            next_layout = layouts[next_layout_index]
+            self.set_layout(next_layout)
+            return next_layout
+        except Exception as e:
+            print(f"[LanguageHandler] Ошибка установки следующего layout_id: {e}")
+            return current_layout
+    
+    def get_layout_name(self, layout: int):
+        return self._lang_names.get(layout, "Unknown")
+    
+    def get_layout_code(self, layout: int):
+        return self._lang_native_codes.get(layout, "--")
+    
     _lang_names = {
         # Европейские языки
         0x0409: 'English',
@@ -125,82 +165,6 @@ class LanguageHandler():
         0x0453: 'ភាសាខ្មែរ',
         0x0454: 'ລາວ',
         0x0455: 'မြန်မာ',
-    }
-
-    _lang_codes = {
-        # Европейские языки
-        0x0409: 'EN',  # English (US)
-        0x0809: 'EN',  # English (UK)
-        0x0419: 'RU',  # Русский
-        0x0407: 'DE',  # Deutsch
-        0x040C: 'FR',  # Français
-        0x040A: 'ES',  # Español
-        0x0410: 'IT',  # Italiano
-        0x0816: 'PT',  # Português (BR)
-        0x0416: 'PT',  # Português (PT)
-        0x0413: 'NL',  # Nederlands
-        0x0415: 'PL',  # Polski
-        0x041D: 'SV',  # Svenska
-        0x0406: 'DA',  # Dansk
-        0x0414: 'NO',  # Norsk (обычно 'nb', но 'no' допустимо)
-        0x040B: 'FI',  # Suomi
-        0x0405: 'CS',  # Čeština
-        0x041B: 'SK',  # Slovenčina
-        0x040E: 'HU',  # Magyar
-        0x0418: 'RO',  # Română
-        0x0402: 'BG',  # Български
-        0x0408: 'EL',  # Ελληνικά
-        0x0422: 'UK',  # Українська
-        0x041F: 'TR',  # Türkçe
-        0x041A: 'HR',  # Hrvatski
-        0x0C1A: 'SR',  # Srpski (Latin)
-        0x081A: 'SR',  # Српски (Cyrillic) — ISO код один
-        0x0424: 'SL',  # Slovenščina
-        0x0425: 'ET',  # Eesti
-        0x0426: 'LV',  # Latviešu
-        0x0427: 'LT',  # Lietuvių
-
-        # Азиатские языки
-        0x0804: 'ZH',  # 中文 (упрощённый)
-        0x0404: 'ZH',  # 中文 (традиционный)
-        0x0411: 'JA',  # 日本語
-        0x0412: 'KO',  # 한국어
-        0x041E: 'TH',  # ไทย
-        0x042A: 'VI',  # Tiếng Việt
-        0x0421: 'ID',  # Bahasa Indonesia
-        0x043E: 'MS',  # Bahasa Melayu
-        0x0439: 'HI',  # हिन्दी
-        0x0445: 'BN',  # বাংলা
-        0x0449: 'TA',  # தமிழ்
-        0x044A: 'TE',  # తెలుగు
-        0x044E: 'MR',  # मराठी
-        0x0420: 'UR',  # اردو
-        0x0429: 'FA',  # فارسی
-        0x0401: 'AR',  # العربية
-        0x040D: 'HE',  # עברית
-
-        # Другие
-        0x0403: 'CA',  # Català
-        0x0456: 'GL',  # Galego
-        0x042D: 'EU',  # Euskara
-        0x040F: 'IS',  # Íslenska
-        0x083C: 'GA',  # Gaeilge
-        0x0452: 'CY',  # Cymraeg
-        0x043A: 'MT',  # Malti
-        0x0441: 'SW',  # Kiswahili
-        0x0436: 'AF',  # Afrikaans
-        0x045E: 'AM',  # አማርኛ
-        0x0437: 'KA',  # ქართული
-        0x042B: 'HY',  # Հայերեն
-        0x042C: 'AZ',  # Azərbaycanca
-        0x043F: 'KK',  # Қазақ тілі
-        0x0443: 'UZ',  # Oʻzbekcha
-        0x0450: 'MN',  # Монгол
-        0x0461: 'NE',  # नेपाली
-        0x045B: 'SI',  # සිංහල
-        0x0453: 'KM',  # ភាសាខ្មែរ
-        0x0454: 'LO',  # ລາວ
-        0x0455: 'MY',  # မြန်မာ
     }
 
     _lang_native_codes = {
@@ -280,3 +244,79 @@ class LanguageHandler():
         0x0454: 'ລາວ',     # ລາວ
         0x0455: 'မြန်',     # မြန်မာ
     }
+
+    # _lang_codes = {
+    #     # Европейские языки
+    #     0x0409: 'EN',  # English (US)
+    #     0x0809: 'EN',  # English (UK)
+    #     0x0419: 'RU',  # Русский
+    #     0x0407: 'DE',  # Deutsch
+    #     0x040C: 'FR',  # Français
+    #     0x040A: 'ES',  # Español
+    #     0x0410: 'IT',  # Italiano
+    #     0x0816: 'PT',  # Português (BR)
+    #     0x0416: 'PT',  # Português (PT)
+    #     0x0413: 'NL',  # Nederlands
+    #     0x0415: 'PL',  # Polski
+    #     0x041D: 'SV',  # Svenska
+    #     0x0406: 'DA',  # Dansk
+    #     0x0414: 'NO',  # Norsk (обычно 'nb', но 'no' допустимо)
+    #     0x040B: 'FI',  # Suomi
+    #     0x0405: 'CS',  # Čeština
+    #     0x041B: 'SK',  # Slovenčina
+    #     0x040E: 'HU',  # Magyar
+    #     0x0418: 'RO',  # Română
+    #     0x0402: 'BG',  # Български
+    #     0x0408: 'EL',  # Ελληνικά
+    #     0x0422: 'UK',  # Українська
+    #     0x041F: 'TR',  # Türkçe
+    #     0x041A: 'HR',  # Hrvatski
+    #     0x0C1A: 'SR',  # Srpski (Latin)
+    #     0x081A: 'SR',  # Српски (Cyrillic) — ISO код один
+    #     0x0424: 'SL',  # Slovenščina
+    #     0x0425: 'ET',  # Eesti
+    #     0x0426: 'LV',  # Latviešu
+    #     0x0427: 'LT',  # Lietuvių
+    # 
+    #     # Азиатские языки
+    #     0x0804: 'ZH',  # 中文 (упрощённый)
+    #     0x0404: 'ZH',  # 中文 (традиционный)
+    #     0x0411: 'JA',  # 日本語
+    #     0x0412: 'KO',  # 한국어
+    #     0x041E: 'TH',  # ไทย
+    #     0x042A: 'VI',  # Tiếng Việt
+    #     0x0421: 'ID',  # Bahasa Indonesia
+    #     0x043E: 'MS',  # Bahasa Melayu
+    #     0x0439: 'HI',  # हिन्दी
+    #     0x0445: 'BN',  # বাংলা
+    #     0x0449: 'TA',  # தமிழ்
+    #     0x044A: 'TE',  # తెలుగు
+    #     0x044E: 'MR',  # मराठी
+    #     0x0420: 'UR',  # اردو
+    #     0x0429: 'FA',  # فارسی
+    #     0x0401: 'AR',  # العربية
+    #     0x040D: 'HE',  # עברית
+    # 
+    #     # Другие
+    #     0x0403: 'CA',  # Català
+    #     0x0456: 'GL',  # Galego
+    #     0x042D: 'EU',  # Euskara
+    #     0x040F: 'IS',  # Íslenska
+    #     0x083C: 'GA',  # Gaeilge
+    #     0x0452: 'CY',  # Cymraeg
+    #     0x043A: 'MT',  # Malti
+    #     0x0441: 'SW',  # Kiswahili
+    #     0x0436: 'AF',  # Afrikaans
+    #     0x045E: 'AM',  # አማርኛ
+    #     0x0437: 'KA',  # ქართული
+    #     0x042B: 'HY',  # Հայերեն
+    #     0x042C: 'AZ',  # Azərbaycanca
+    #     0x043F: 'KK',  # Қазақ тілі
+    #     0x0443: 'UZ',  # Oʻzbekcha
+    #     0x0450: 'MN',  # Монгол
+    #     0x0461: 'NE',  # नेपाली
+    #     0x045B: 'SI',  # සිංහල
+    #     0x0453: 'KM',  # ភាសាខ្មែរ
+    #     0x0454: 'LO',  # ລາວ
+    #     0x0455: 'MY',  # မြန်မာ
+    # }

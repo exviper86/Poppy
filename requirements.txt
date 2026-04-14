@@ -1,8 +1,10 @@
 # Poppy — desktop notification utility for Windows
 # Direct runtime dependencies only
 
-PyQt6>=6.5
+PyQt6>=6.9.1
 qasync>=0.28.0
-keyboard>=0.13.5
 pywin32>=300
+pycaw>=20251023
+winsdk>=1.0.0b10
+pyperclip>=1.11.0
 https://github.com/AndreMiras/pycaw/archive/develop.zip

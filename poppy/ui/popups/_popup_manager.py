@@ -1,5 +1,3 @@
-# popup_manager.py
-
 # Copyright (C) 2025 exviper86
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
@@ -11,88 +9,88 @@
 # You should have received a copy of the GNU General Public License along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from PyQt6.QtCore import QPoint
-from animations import Animation
+from poppy.animations import Animation
+from poppy.config import config
+from ._base_popup import BasePopup
 
 class PopupManager:
-    def __init__(self, config):
-        self.config = config
+    def __init__(self):
+        self._popups = []
         
-        self.popups = []
+        self._PADDING = 20
+        self._TASKBAR_PADDING = 45
+        self._SLIDE_OFFSET = 50
+        self._SPACE = 8
         
-        self.PADDING = 20
-        self.TASKBAR_PADDING = 45
-        self.SLIDE_OFFSET = 50
-        self.SPACE = 8
+        self._block = False
         
-        self.block = False
+    def add_popup(self, popup: BasePopup):
+        self._popups.append(popup)
         
-    def add_popup(self, popup):
-        self.popups.append(popup)
-        
-    def update_popups(self, popup):
-        if self.block:
+    def update_popups(self, popup: BasePopup):
+        if self._block:
             return
         
-        self.block = True
-        for p in self.popups:
+        self._block = True
+        for p in self._popups:
             if p != popup and p.is_active and p.screen_position == popup.screen_position:
                 p.shift_popup(self._get_shift_animation(p))
-        self.block = False
+        self._block = False
         
-    def get_start_position(self, popup):
-        if self.config.animation:
+    def get_start_position(self, popup: BasePopup):
+        if config.common.animation.value:
             return self._get_position(popup) + self._get_slide_offset(popup)
         else:
             return self._get_position(popup)
     
-    def get_fadeIn_animation(self, popup):
+    def get_fadeIn_animation(self, popup: BasePopup):
         anim = Animation()
         anim.getStartValueOnRun = True
-        anim.endValue = self.config.popup_transparency / 100
-        anim.duration = self.config.popup_show_duration
+        anim.endValue = config.common.popup_transparency.value / 100
+        anim.duration = config.common.popup_show_duration.value
         anim.getter = lambda: popup.windowOpacity()
         anim.setter = lambda v: popup.setWindowOpacity(v)
         return anim
 
-    def get_in_animation(self, popup):
+    def get_in_animation(self, popup: BasePopup):
         anim = Animation()
-        if self.config.animation and popup.screen_position:
+        if config.common.animation.value and popup.screen_position:
             anim.getStartValueOnRun = True
             anim.endValue = self._get_position(popup)
-            anim.duration = self.config.popup_show_duration
+            anim.duration = config.common.popup_show_duration.value
             anim.getter = lambda: popup.pos()
             anim.setter = lambda v: popup.move(v)
         return anim   
     
-    def get_fadeOut_animation(self, popup):
+    def get_fadeOut_animation(self, popup: BasePopup):
         anim = Animation()
         anim.getStartValueOnRun = True
         anim.endValue = 0.0
-        anim.duration = self.config.popup_show_duration * 2
+        anim.duration = config.common.popup_show_duration.value * 2
         anim.getter = lambda: popup.windowOpacity()
         anim.setter = lambda v: popup.setWindowOpacity(v)
         return anim
 
-    def get_out_animation(self, popup):
+    def get_out_animation(self, popup: BasePopup):
         anim = Animation()
-        if self.config.animation and popup.screen_position:
+        if config.common.animation.value and popup.screen_position:
             anim.getStartValueOnRun = True
             anim.endValue = popup.pos() + self._get_slide_offset(popup)
-            anim.duration = self.config.popup_show_duration * 2
+            anim.duration = config.common.popup_show_duration.value * 2
             anim.getter = lambda: popup.pos()
             anim.setter = lambda v: popup.move(v)
         return anim
 
-    def _get_shift_animation(self, popup):
+    def _get_shift_animation(self, popup: BasePopup):
         anim = Animation()
         anim.getStartValueOnRun = True
         anim.endValue = self._get_position(popup)
-        anim.duration = self.config.popup_show_duration
+        anim.duration = config.common.popup_show_duration.value
         anim.getter = lambda: popup.pos()
         anim.setter = lambda v: popup.move(v)
         return anim
 
-    def _get_position(self, popup):
+    def _get_position(self, popup: BasePopup):
         if not popup.screen_position:
             return popup.pos()
         
@@ -106,9 +104,9 @@ class PopupManager:
         screen_geo = screen.availableGeometry()
         w, h = popup.window_width, popup.window_height
 
-        paddingX = self.PADDING
-        paddingY = self.PADDING
-        taskbar_padding = self.TASKBAR_PADDING if self.config.taskbar else 0
+        paddingX = self._PADDING
+        paddingY = self._PADDING
+        taskbar_padding = self._TASKBAR_PADDING if config.common.taskbar.value else 0
 
         if popup.screen_position == "left-top":
             popup_position = QPoint(paddingX, paddingY)
@@ -134,31 +132,31 @@ class PopupManager:
         prev = self._find_nearest_lower_popup(popup)
         if prev:
             if "top" in popup.screen_position:
-                popup_position.setY(self._get_position(prev).y() + prev.window_height + self.SPACE)
+                popup_position.setY(self._get_position(prev).y() + prev.window_height + self._SPACE)
             else:
-                popup_position.setY(self._get_position(prev).y() - h - self.SPACE)
+                popup_position.setY(self._get_position(prev).y() - h - self._SPACE)
 
         return popup_position
 
-    def _get_slide_offset(self, popup):
+    def _get_slide_offset(self, popup: BasePopup):
         if not popup.screen_position:
             return QPoint(0, 0)
 
         if popup.screen_position.startswith("left"):
-            offset = QPoint(-self.SLIDE_OFFSET, 0)
+            offset = QPoint(-self._SLIDE_OFFSET, 0)
         elif popup.screen_position.startswith("right"):
-            offset = QPoint(self.SLIDE_OFFSET, 0)
+            offset = QPoint(self._SLIDE_OFFSET, 0)
         elif popup.screen_position == "top":
-            offset = QPoint(0, -self.SLIDE_OFFSET)
+            offset = QPoint(0, -self._SLIDE_OFFSET)
         else:
-            offset = QPoint(0, self.SLIDE_OFFSET)
+            offset = QPoint(0, self._SLIDE_OFFSET)
         return offset
 
-    def _find_nearest_lower_popup(self, popup):
+    def _find_nearest_lower_popup(self, popup: BasePopup):
         prev_popup = None
         order = -1
     
-        for p in self.popups:
+        for p in self._popups:
             if p is popup or not p.isVisible() or p.screen_position != popup.screen_position:
                 continue
     

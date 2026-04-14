@@ -1,1 +1,1 @@
-pyinstaller --onefile --windowed --name Poppy --add-data "poppy/resources;resources" --icon="poppy/resources/icon.ico" poppy/main.py
+pyinstaller --onefile --windowed --name Poppy --add-data "poppy/resources;poppy/resources" --icon="poppy/resources/icon.ico" main.py

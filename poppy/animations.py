@@ -1,5 +1,3 @@
-# animations.py
-
 # Copyright (C) 2025 exviper86
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
@@ -15,7 +13,6 @@ from PyQt6.QtCore import QTimer, QPoint, QPointF, QSize, QSizeF
 from PyQt6.QtGui import QColor
 from PyQt6.QtWidgets import QApplication
 
-
 class Animation:
 
     _animations = set()
@@ -23,15 +20,15 @@ class Animation:
     def __init__(self):
         self.startValue = None      # Если None — берётся из getter()
         self.endValue = None        # Если None — берётся из getter()
-        self.duration = 0           # ms, если <=0 — анимация не запустится
-        self.delay = 0              # ms, задержка перед запуском
-        self.framerate = None       # кадров в секунду (FPS), если None — определяется автоматически
+        self.duration: int = 0           # ms, если <=0 — анимация не запустится
+        self.delay: int = 0              # ms, задержка перед запуском
+        self.framerate: int = 0          # кадров в секунду (FPS), если 0 — определяется автоматически
         self.getter = lambda: 0.0
         self.setter = lambda x: None
         self.onStarted = None
         self.onFinished = None
-        self.getStartValueOnRun = False
-        self.getEndValueOnRun = False
+        self.getStartValueOnRun: bool = False
+        self.getEndValueOnRun: bool = False
 
         self._timer = None          # таймер основной анимации
         self._delay_timer = None    # таймер задержки
@@ -80,7 +77,7 @@ class Animation:
 
         # Определяем частоту кадров
         framerate = self.framerate
-        if framerate is None:
+        if framerate <= 0:
             screen = QApplication.primaryScreen()
             framerate = screen.refreshRate() if screen else 60
 
@@ -153,7 +150,7 @@ class Animation:
         if progress >= 1.0:
             self.stop(True)
 
-    def stop(self, with_onFinished = False):
+    def stop(self, with_onFinished: bool = False):
         """Останавливает анимацию и таймер задержки."""
         if self._delay_timer:
             self._delay_timer.stop()
@@ -172,11 +169,11 @@ class Animation:
         self._running = False
 
     @property
-    def is_running(self):
+    def is_running(self) -> bool:
         return self._running
 
     @property
-    def is_delaying(self):
+    def is_delaying(self) -> bool:
         return self._delay_timer is not None
 
     @classmethod

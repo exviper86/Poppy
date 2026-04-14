@@ -1,5 +1,3 @@
-# translations.py
-
 # Copyright (C) 2025 exviper86
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
@@ -32,6 +30,7 @@ class Translations():
         self._add_tray_translations()
         self._add_settings_translations()
         self._add_audio_switch_translations()
+        self._add_layout_switch_translations()
         self._add_info_translations()
 
     @property
@@ -47,12 +46,12 @@ class Translations():
         self._add(self.lang_ru, self.input_language, "Язык ввода")
         
         self.on = "on"
-        self._add(self.lang_en, self.on, "on")
-        self._add(self.lang_ru, self.on, "вкл")
+        self._add(self.lang_en, self.on, "On")
+        self._add(self.lang_ru, self.on, "Вкл")
         
         self.off = "off"
-        self._add(self.lang_en, self.off, "off")
-        self._add(self.lang_ru, self.off, "выкл")
+        self._add(self.lang_en, self.off, "Off")
+        self._add(self.lang_ru, self.off, "Выкл")
         
         self.insert = "insert"
         self._add(self.lang_en, self.insert, "Insert")
@@ -92,63 +91,60 @@ class Translations():
         self.volume_group = "volume_group"
         self.media_group = "media_group"
         self.general_group = "general_group"
+        self.audio_switch_group = "audio_switch_group"
+        self.layout_switch_group = "layout_switch_group"
 
-        self._add(self.lang_en, self.keyboard_group, "KEYBOARD")
-        self._add(self.lang_ru, self.keyboard_group, "КЛАВИАТУРА")
+        self._add(self.lang_en, self.keyboard_group, "Keyboard")
+        self._add(self.lang_ru, self.keyboard_group, "Клавиатура")
 
-        self._add(self.lang_en, self.volume_group, "VOLUME")
-        self._add(self.lang_ru, self.volume_group, "ГРОМКОСТЬ")
+        self._add(self.lang_en, self.volume_group, "Volume")
+        self._add(self.lang_ru, self.volume_group, "Громкость")
 
-        self._add(self.lang_en, self.media_group, "MEDIA")
-        self._add(self.lang_ru, self.media_group, "МУЛЬТИМЕДИА")
+        self._add(self.lang_en, self.media_group, "Media")
+        self._add(self.lang_ru, self.media_group, "Мультимедиа")
 
-        self._add(self.lang_en, self.general_group, "GENERAL")
-        self._add(self.lang_ru, self.general_group, "ОБЩИЕ")
+        self._add(self.lang_en, self.general_group, "Common settings")
+        self._add(self.lang_ru, self.general_group, "Общие настройки")
 
+        self._add(self.lang_en, self.audio_switch_group, "Audio devices")
+        self._add(self.lang_ru, self.audio_switch_group, "Аудио устройства")
+
+        self._add(self.lang_en, self.layout_switch_group, "Layout")
+        self._add(self.lang_ru, self.layout_switch_group, "Раскладка")
+        
         # Клавиатура
         self.keyboard_enable = "keyboard_enable"
         self.keyboard_show_language = "keyboard_show_language"
         self.keyboard_show_cursor = "keyboard_show_cursor"
-        self.keyboard_show_locks = "keyboard_show_locks"
+        self.keyboard_show_modifiers = "keyboard_show_modifiers"
         self.sound_enable = "sound_enable"
-        self.sound_type_1 = "sound_type_1"
-        self.sound_type_2 = "sound_type_2"
-        self.sound_type_3 = "sound_type_3"
-        self.sound_type_4 = "sound_type_4"
-        self.sound_type_5 = "sound_type_5"
-        self.sound_type_6 = "sound_type_6"
+        self.sound_type = "sound_type"
+        self.sound_type_cb = "sound_type_cb"
         self.override_duration = "override_duration"
 
         self._add(self.lang_en, self.keyboard_enable, "Show keyboard popup")
         self._add(self.lang_ru, self.keyboard_enable, "Показывать окно клавиатуры")
 
-        self._add(self.lang_en, self.keyboard_show_language, "on language switch")
-        self._add(self.lang_ru, self.keyboard_show_language, "при смене языка")
+        self._add(self.lang_en, self.keyboard_show_language, "Show on language switch")
+        self._add(self.lang_ru, self.keyboard_show_language, "Показывать при смене языка")
 
-        self._add(self.lang_en, self.keyboard_show_cursor, "language near cursor")
-        self._add(self.lang_ru, self.keyboard_show_cursor, "смена языка рядом с курсором")
+        self._add(self.lang_en, self.keyboard_show_cursor, "Language popup near cursor")
+        self._add(self.lang_ru, self.keyboard_show_cursor, "Окно языка рядом с курсором")
 
-        self._add(self.lang_en, self.keyboard_show_locks, "on lock keys press")
-        self._add(self.lang_ru, self.keyboard_show_locks, "при нажатии клавиш режима")
+        self._add(self.lang_en, self.keyboard_show_modifiers, "Show on lock keys press")
+        self._add(self.lang_ru, self.keyboard_show_modifiers, "Показывать при нажатии клавиш режима")
 
-        self._add(self.lang_en, self.sound_enable, "sound effect:")
-        self._add(self.lang_ru, self.sound_enable, "звуковой эффект:")
+        self._add(self.lang_en, self.sound_enable, "Sound effect on show")
+        self._add(self.lang_ru, self.sound_enable, "Звуковой эффект при показе")
 
-        self._add(self.lang_en, self.sound_type_1, "sound 1")
-        self._add(self.lang_ru, self.sound_type_1, "звук 1")
-        self._add(self.lang_en, self.sound_type_2, "sound 2")
-        self._add(self.lang_ru, self.sound_type_2, "звук 2")
-        self._add(self.lang_en, self.sound_type_3, "sound 3")
-        self._add(self.lang_ru, self.sound_type_3, "звук 3")
-        self._add(self.lang_en, self.sound_type_4, "sound 4")
-        self._add(self.lang_ru, self.sound_type_4, "звук 4")
-        self._add(self.lang_en, self.sound_type_5, "sound 5")
-        self._add(self.lang_ru, self.sound_type_5, "звук 5")
-        self._add(self.lang_en, self.sound_type_6, "sound 6")
-        self._add(self.lang_ru, self.sound_type_6, "звук 6")
+        self._add(self.lang_en, self.sound_type, "Sound type")
+        self._add(self.lang_ru, self.sound_type, "Тип звука")
         
-        self._add(self.lang_en, self.override_duration, "override duration:")
-        self._add(self.lang_ru, self.override_duration, "своя длительность:")
+        self._add(self.lang_en, self.sound_type_cb, "Sound")
+        self._add(self.lang_ru, self.sound_type_cb, "Звук")
+        
+        self._add(self.lang_en, self.override_duration, "Override popup duration")
+        self._add(self.lang_ru, self.override_duration, "Переопределить длительность отображения")
         
         # Громкость
         self.volume_enable = "volume_enable"
@@ -160,17 +156,17 @@ class Translations():
         self._add(self.lang_en, self.volume_enable, "Show volume popup")
         self._add(self.lang_ru, self.volume_enable, "Показывать окно громкости")
 
-        self._add(self.lang_en, self.volume_show_media, "+ media popup")
-        self._add(self.lang_ru, self.volume_show_media, "+ окно мультимедиа")
+        self._add(self.lang_en, self.volume_show_media, "Also show media popup")
+        self._add(self.lang_ru, self.volume_show_media, "Также показывать окно мультимедиа")
 
-        self._add(self.lang_en, self.volume_step, "volume step via keys")
-        self._add(self.lang_ru, self.volume_step, "шаг громкости клавишами")
+        self._add(self.lang_en, self.volume_step, "Volume change step via keys")
+        self._add(self.lang_ru, self.volume_step, "Шаг изменения громкости клавишами")
 
-        self._add(self.lang_en, self.volume_show_name, "audio device name")
-        self._add(self.lang_ru, self.volume_show_name, "имя аудио устройства")
+        self._add(self.lang_en, self.volume_show_name, "Show audio device name")
+        self._add(self.lang_ru, self.volume_show_name, "Показывать имя аудио устройства")
 
-        self._add(self.lang_en, self.volume_full_name, "full device name")
-        self._add(self.lang_ru, self.volume_full_name, "полное имя устройства")
+        self._add(self.lang_en, self.volume_full_name, "Show full device name")
+        self._add(self.lang_ru, self.volume_full_name, "Показывать полное имя устройства")
 
         # Мультимедиа
         self.media_enable = "media_enable"
@@ -182,82 +178,89 @@ class Translations():
         self._add(self.lang_en, self.media_enable, "Show media popup")
         self._add(self.lang_ru, self.media_enable, "Показывать окно мультимедиа")
 
-        self._add(self.lang_en, self.media_show_volume, "+ volume popup")
-        self._add(self.lang_ru, self.media_show_volume, "+ окно громкости")
+        self._add(self.lang_en, self.media_show_volume, "Also show volume popup")
+        self._add(self.lang_ru, self.media_show_volume, "Также показывать окно громкости")
 
-        self._add(self.lang_en, self.media_show_on_change, "show on track change")
-        self._add(self.lang_ru, self.media_show_on_change, "показывать при смене трека")
+        self._add(self.lang_en, self.media_show_on_change, "Show on track change")
+        self._add(self.lang_ru, self.media_show_on_change, "Показывать при смене трека")
 
-        self._add(self.lang_en, self.media_show_timeline, "track timeline")
-        self._add(self.lang_ru, self.media_show_timeline, "прогресс трека")
+        self._add(self.lang_en, self.media_show_timeline, "Show track timeline")
+        self._add(self.lang_ru, self.media_show_timeline, "Показывать прогресс трека")
 
-        self._add(self.lang_en, self.media_color_by_cover, "popup colored by cover")
-        self._add(self.lang_ru, self.media_color_by_cover, "окно в цвет обложки")
+        self._add(self.lang_en, self.media_color_by_cover, "Color popup by cover")
+        self._add(self.lang_ru, self.media_color_by_cover, "Красить окно в цвет обложки")
 
-        # Общие
-        self.app_language = "app_language"
+        # Общие настройки
+        self.app_language_label = "app_language_label"
         self.duration_label = "duration_label"
         self.transparency_label = "transparency_label"
         self.show_duration_label = "show_duration_label"
-        self.animation = "animation"
-        self.taskbar = "taskbar"
-        self.autostart = "autostart"
-        self.audio_switch_btn = "audio_switch_btn"
+        self.animation_label = "animation_label"
+        self.taskbar_label = "taskbar_label"
+        self.autostart_label = "autostart_label"
+
+        self._add(self.lang_en, self.app_language_label, "Application language")
+        self._add(self.lang_ru, self.app_language_label, "Язык приложения")
+        
+        self._add(self.lang_en, self.duration_label, "Popup duration")
+        self._add(self.lang_ru, self.duration_label, "Длительность отображения окна")
+
+        self._add(self.lang_en, self.transparency_label, "Popup opacity")
+        self._add(self.lang_ru, self.transparency_label, "Непрозрачность окна")
+
+        self._add(self.lang_en, self.show_duration_label, "Popup fade-in time")
+        self._add(self.lang_ru, self.show_duration_label, "Время появления окна")
+
+        self._add(self.lang_en, self.animation_label, "Popup slide animation")
+        self._add(self.lang_ru, self.animation_label, "Всплывающая анимация окна")
+
+        self._add(self.lang_en, self.taskbar_label, "Padding for taskbar_label")
+        self._add(self.lang_ru, self.taskbar_label, "Учитывать панель задач")
+
+        self._add(self.lang_en, self.autostart_label, "Launch on system startup")
+        self._add(self.lang_ru, self.autostart_label, "Запускать при старте системы")
+
+        # Общее
+        self.hotkey_label = "hotkey_label"
+        self.hotkey_placeholder = "hotkey_placeholder"
+        self.clear_btn = "clear_btn"
         self.close_btn = "close_btn"
 
-        self._add(self.lang_en, self.app_language, "Application language:")
-        self._add(self.lang_ru, self.app_language, "Язык приложения:")
+        self._add(self.lang_en, self.hotkey_label, "Hotkey")
+        self._add(self.lang_ru, self.hotkey_label, "Сочетание клавиш")
         
-        self._add(self.lang_en, self.duration_label, "Popup duration:")
-        self._add(self.lang_ru, self.duration_label, "Длительность отображения:")
+        self._add(self.lang_en, self.hotkey_placeholder, "press hotkey...")
+        self._add(self.lang_ru, self.hotkey_placeholder, "нажмите...")
 
-        self._add(self.lang_en, self.transparency_label, "Popup opacity:")
-        self._add(self.lang_ru, self.transparency_label, "Непрозрачность окна:")
-
-        self._add(self.lang_en, self.show_duration_label, "Popup fade-in time:")
-        self._add(self.lang_ru, self.show_duration_label, "Время появления окна:")
-
-        self._add(self.lang_en, self.animation, "Slide animation")
-        self._add(self.lang_ru, self.animation, "Анимация появления")
-
-        self._add(self.lang_en, self.taskbar, "Padding for taskbar")
-        self._add(self.lang_ru, self.taskbar, "Учитывать панель задач")
-
-        self._add(self.lang_en, self.autostart, "Launch on system startup")
-        self._add(self.lang_ru, self.autostart, "Запускать при старте системы")
-
-        self._add(self.lang_en, self.audio_switch_btn, "Audio device switching settings")
-        self._add(self.lang_ru, self.audio_switch_btn, "Настройка переключения аудио устройств")
+        self._add(self.lang_en, self.clear_btn, "Reset")
+        self._add(self.lang_ru, self.clear_btn, "Сбросить")
 
         self._add(self.lang_en, self.close_btn, "Close")
         self._add(self.lang_ru, self.close_btn, "Закрыть")
 
         # Суффиксы
+        self.s_suffix = "s_suffix"
         self.ms_suffix = "ms_suffix"
-        self.percent_suffix = "percent_suffix"
 
-        self._add(self.lang_en, self.ms_suffix, " ms")
-        self._add(self.lang_ru, self.ms_suffix, " мс")
-
-        self._add(self.lang_en, self.percent_suffix, "%")
-        self._add(self.lang_ru, self.percent_suffix, "%")
+        self._add(self.lang_en, self.s_suffix, "sec")
+        self._add(self.lang_ru, self.s_suffix, "сек")
+        
+        self._add(self.lang_en, self.ms_suffix, "ms")
+        self._add(self.lang_ru, self.ms_suffix, "мс")
 
     def _add_audio_switch_translations(self):
-        # Заголовок окна
         self.audio_switch_title = "audio_switch_title"
-        self._add(self.lang_en, self.audio_switch_title, "Audio device switching settings")
-        self._add(self.lang_ru, self.audio_switch_title, "Настройки переключения аудио устройств")
-    
-        # Опции
         self.audio_switch_double_click = "audio_switch_double_click"
         self.audio_switch_tray = "audio_switch_tray"
         self.audio_switch_tray_full_name = "audio_switch_tray_full_name"
         self.audio_switch_hotkey = "audio_switch_hotkey"
-        self.audio_switch_hotkey_placeholder = "audio_switch_hotkey_placeholder"
-        self.audio_switch_clear_btn = "audio_switch_clear_btn"
         self.audio_switch_set_communication = "audio_switch_set_communication"
         self.audio_switch_select_audio = "audio_switch_select_audio"
-        self.audio_switch_devices_group = "audio_switch_devices_group"
+        self.audio_switch_devices_select = "audio_switch_devices_select"
+        self.audio_switch_default_mic = "audio_switch_default_mic"
+
+        self._add(self.lang_en, self.audio_switch_title, "Audio device switching settings")
+        self._add(self.lang_ru, self.audio_switch_title, "Настройка переключения аудио устройств")
     
         self._add(self.lang_en, self.audio_switch_double_click, "On double-click on volume popup")
         self._add(self.lang_ru, self.audio_switch_double_click, "По двойному клику на окне громкости")
@@ -268,14 +271,8 @@ class Translations():
         self._add(self.lang_en, self.audio_switch_tray_full_name, "Full device name in system tray")
         self._add(self.lang_ru, self.audio_switch_tray_full_name, "Полное имя устройства в системном трее")
     
-        self._add(self.lang_en, self.audio_switch_hotkey, "By hotkey:")
-        self._add(self.lang_ru, self.audio_switch_hotkey, "Cочетанием клавиш:")
-    
-        self._add(self.lang_en, self.audio_switch_hotkey_placeholder, "press hotkey...")
-        self._add(self.lang_ru, self.audio_switch_hotkey_placeholder, "нажмите сочетание...")
-    
-        self._add(self.lang_en, self.audio_switch_clear_btn, "Reset")
-        self._add(self.lang_ru, self.audio_switch_clear_btn, "Сбросить")
+        self._add(self.lang_en, self.audio_switch_hotkey, "By hotkey")
+        self._add(self.lang_ru, self.audio_switch_hotkey, "Cочетанием клавиш")
     
         self._add(self.lang_en, self.audio_switch_set_communication, "Also set as communication device")
         self._add(self.lang_ru, self.audio_switch_set_communication, "Установливать и как устройство связи")
@@ -283,8 +280,33 @@ class Translations():
         self._add(self.lang_en, self.audio_switch_select_audio, "Only among selected devices")
         self._add(self.lang_ru, self.audio_switch_select_audio, "Только среди выбранных устройств")
     
-        self._add(self.lang_en, self.audio_switch_devices_group, "Devices to switch between")
-        self._add(self.lang_ru, self.audio_switch_devices_group, "Выбор устройств для переключения")
+        self._add(self.lang_en, self.audio_switch_devices_select, "Devices to switch between")
+        self._add(self.lang_ru, self.audio_switch_devices_select, "Выбор устройств для переключения")
+
+        self._add(self.lang_en, self.audio_switch_default_mic, "default mic")
+        self._add(self.lang_ru, self.audio_switch_default_mic, "микрофон по умолчанию")
+    
+    def _add_layout_switch_translations(self):
+        self.layout_switch_last = "layout_switch_last" 
+        self.layout_switch_if_no_last = "layout_switch_if_no_last"
+        self.layout_switch_selected = "layout_switch_selected"
+        self.layout_switch_case = "layout_switch_case"
+        self.layout_switch_block_locks = "layout_switch_block_locks"
+
+        self._add(self.lang_en, self.layout_switch_last, "Switch last typed word layout")
+        self._add(self.lang_ru, self.layout_switch_last, "Смена раскладки последнего набранного слова")
+
+        self._add(self.lang_en, self.layout_switch_if_no_last, "Switch layout even if there is no last word")
+        self._add(self.lang_ru, self.layout_switch_if_no_last, "Переключать раскладку, даже если нет последнего слова")
+        
+        self._add(self.lang_en, self.layout_switch_selected, "Switch selected text layout")
+        self._add(self.lang_ru, self.layout_switch_selected, "Смена раскладки выделенного текста")
+
+        self._add(self.lang_en, self.layout_switch_case, "Switch selected text case")
+        self._add(self.lang_ru, self.layout_switch_case, "Смена регистра выделенного текста")
+        
+        self._add(self.lang_en, self.layout_switch_block_locks, "Do not send Caps, Scroll, Num Lock and Insert to system in hotkeys")
+        self._add(self.lang_ru, self.layout_switch_block_locks, "Не передавать системе Caps, Scroll, Num Lock и Insert в сочетаниях клавиш")
         
     def _add_info_translations(self):
         # О приложении
@@ -420,7 +442,7 @@ class Translations():
                   )
 
 
-translations = Translations()
+translations: Translations = Translations()
 
-from localizer import Localizer
-localizer = Localizer(translations._translations, "en")
+from .localizer import Localizer
+localizer: Localizer = Localizer(translations._translations, "en")

@@ -1,5 +1,3 @@
-# media_info_popup.py
-
 # Copyright (C) 2025 exviper86
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
@@ -15,12 +13,13 @@ import asyncio
 import winsdk.windows.media.control as wmc
 from winsdk.windows.storage.streams import Buffer, InputStreamOptions
 from datetime import datetime, timezone
-from base_popup import BasePopup
-from PyQt6.QtWidgets import QLabel, QVBoxLayout, QHBoxLayout, QToolButton, QSlider, QWidget, QSizePolicy
+from ._base_popup import BasePopup
+from PyQt6.QtWidgets import QLabel, QVBoxLayout, QHBoxLayout, QToolButton, QWidget
 from PyQt6.QtCore import Qt, QSize, QRectF, QTimer
-from PyQt6.QtGui import QFont, QPixmap, QPainter, QPainterPath, QColor, QImage
-from utils import get_windows_theme, color_with_alpha, load_icon, get_theme_colors
-from scrolling_label import ScrollingLabel
+from PyQt6.QtGui import QFont, QPixmap, QPainter, QPainterPath, QColor
+from poppy.utils import Utils
+from poppy.ui import ScrollingLabel
+from poppy.config import config
 
 class TimelineBar(QWidget):
     def __init__(self, parent=None):
@@ -71,7 +70,7 @@ class TimelineBar(QWidget):
             painter.restore()
 
 class MediaInfoPopup(BasePopup):
-    def start_monitoring(self):
+    def start(self):
         self._session = None
         self._session_manager = None
         self._session_changed_token = None
@@ -87,36 +86,37 @@ class MediaInfoPopup(BasePopup):
         self._timeline_timer.timeout.connect(self._update_timeline)
         self._timeline_timer.setInterval(200)
         
-        self.cover_color = None
+        self._cover_color = None
     
-    def create_content(self, background_widget):
-        self.timeline = TimelineBar(background_widget)
-        self.timeline.resize(self.window_width, self.window_height)
-        self.timeline.set_background_color(QColor(0, 0, 0, 0))
+    def _create_content(self, background_widget):
+        self._timeline = TimelineBar(background_widget)
+        self._timeline.resize(self.window_width, self.window_height)
+        self._timeline.set_background_color(QColor(0, 0, 0, 0))
         
         main_layout = QHBoxLayout(background_widget)
         main_layout.setSpacing(5)
     
         # Обложка (слева)
-        self.cover_label = QLabel()
-        self.cover_label.setFixedSize(80, 80)
-        self.cover_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._cover_label = QLabel()
+        self._cover_label.setFixedSize(80, 80)
+        self._cover_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._set_default_cover()
+        #self._cover_label.setVisible(False)
     
         # Текст и кнопки (справа)
         right_layout = QVBoxLayout()
         right_layout.setSpacing(5)
     
         # Текст
-        self.title_label = ScrollingLabel()
-        self.title_label.setFont(QFont("Segoe UI Variable", 11, QFont.Weight.DemiBold))
-        self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignTop)
-        self.title_label.setFixedHeight(18)
+        self._title_label = ScrollingLabel()
+        self._title_label.setFont(QFont("Segoe UI Variable", 11, QFont.Weight.DemiBold))
+        self._title_label.setAlignment(Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignTop)
+        self._title_label.setFixedHeight(18)
     
-        self.artist_label = ScrollingLabel()
-        self.artist_label.setFont(QFont("Segoe UI Variable", 10, QFont.Weight.DemiBold))
-        self.artist_label.setAlignment(Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignTop)
-        #self.artist_label.setFixedHeight(18)
+        self._artist_label = ScrollingLabel()
+        self._artist_label.setFont(QFont("Segoe UI Variable", 10, QFont.Weight.DemiBold))
+        self._artist_label.setAlignment(Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignTop)
+        #self._artist_label.setFixedHeight(18)
     
         # Кнопки управления
         buttons_layout = QHBoxLayout()
@@ -124,41 +124,41 @@ class MediaInfoPopup(BasePopup):
         buttons_layout.setSpacing(10)
         buttons_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
     
-        self.prev_button = QToolButton()
-        self.play_pause_button = QToolButton()
-        self.next_button = QToolButton()
+        self._prev_button = QToolButton()
+        self._play_pause_button = QToolButton()
+        self._next_button = QToolButton()
     
         # Устанавливаем минимальный размер и стиль
-        for btn in (self.prev_button, self.play_pause_button, self.next_button):
+        for btn in (self._prev_button, self._play_pause_button, self._next_button):
             btn.setFixedSize(50, 35)
             btn.setIconSize(QSize(20, 20))
     
-        buttons_layout.addWidget(self.prev_button)
-        buttons_layout.addWidget(self.play_pause_button)
-        buttons_layout.addWidget(self.next_button)
+        buttons_layout.addWidget(self._prev_button)
+        buttons_layout.addWidget(self._play_pause_button)
+        buttons_layout.addWidget(self._next_button)
     
         # Собираем правую часть
-        right_layout.addWidget(self.title_label)
-        right_layout.addWidget(self.artist_label)
+        right_layout.addWidget(self._title_label)
+        right_layout.addWidget(self._artist_label)
         right_layout.addLayout(buttons_layout)
         #right_layout.addStretch()
     
         # Основной layout
-        main_layout.addWidget(self.cover_label)
+        main_layout.addWidget(self._cover_label)
         main_layout.addLayout(right_layout)
 
         # Подключаем кнопки
-        self.prev_button.clicked.connect(lambda: asyncio.create_task(self._on_prev_clicked()))
-        self.next_button.clicked.connect(lambda: asyncio.create_task(self._on_next_clicked()))
-        self.play_pause_button.clicked.connect(lambda: asyncio.create_task(self._on_play_pause_clicked()))
+        self._prev_button.clicked.connect(lambda: asyncio.create_task(self._on_prev_clicked()))
+        self._next_button.clicked.connect(lambda: asyncio.create_task(self._on_next_clicked()))
+        self._play_pause_button.clicked.connect(lambda: asyncio.create_task(self._on_play_pause_clicked()))
 
-    def apply_theme_content(self, colors):
-        self.title_label.setStyleSheet(f"color: {colors['accent']};")
-        self.artist_label.setStyleSheet(f"color: {colors['text']};")
-        #self.cover_label.setStyleSheet(f"background-color: {color_with_alpha(colors['border'], 175)}; border-radius: 8px;")
-        self.cover_label.setStyleSheet(f"background-color: transparent;")
+    def _apply_theme_content(self, colors):
+        self._title_label.setStyleSheet(f"color: {colors['accent']};")
+        self._artist_label.setStyleSheet(f"color: {colors['text']};")
+        #self._cover_label.setStyleSheet(f"background-color: {color_with_alpha(colors['border'], 175)}; border-radius: 8px;")
+        self._cover_label.setStyleSheet(f"background-color: transparent;")
 
-        for btn in (self.prev_button, self.play_pause_button, self.next_button):
+        for btn in (self._prev_button, self._play_pause_button, self._next_button):
             btn.setStyleSheet(f"""
                 QToolButton {{
                     background-color: transparent;
@@ -166,23 +166,23 @@ class MediaInfoPopup(BasePopup):
                     border-radius: 6px;
                 }}
                 QToolButton:hover {{
-                    background-color: {color_with_alpha(colors['border'], 175)};
+                    background-color: {Utils.color_with_alpha(colors['border'], 175)};
                 }}
                 QToolButton:pressed {{
-                    background-color: {color_with_alpha(colors['text'], 50)};
+                    background-color: {Utils.color_with_alpha(colors['text'], 50)};
                 }}
                 QToolButton:disabled {{
                 }}
             """)
 
-        #self.timeline.set_progress_color(QColor(color_with_alpha(colors['border'], 100)))
+        #self._timeline.set_progress_color(QColor(color_with_alpha(colors['border'], 100)))
 
-    def update_screen_position(self):
-        self.screen_position = self.app.config.media_window_position
+    def _update_screen_position(self):
+        self._screen_position = config.media_window.position.value
     
     def showEvent(self, a0):
         super().showEvent(a0)
-        if self.app.config.media_window_show_timeline:
+        if config.media_window.show_timeline.value:
             self._timeline_timer.start()
     
     def hideEvent(self, a0):
@@ -190,14 +190,14 @@ class MediaInfoPopup(BasePopup):
         self._timeline_timer.stop()
     
     def show_popup(self):
-        if not self.app.config.media_window_enable:
+        if not config.media_window.enable.value:
             return
 
         if not self._session:
             return 
 
-        if self.app.config.media_window_show_volume and (not self.app.volume_popup.isVisible() or not self.app.volume_popup.is_active):
-            self.app.volume_popup.show_popup(self.app.keyboard_handler.get_volume())
+        if config.media_window.show_volume.value and (not self._app.volume_popup.isVisible() or not self._app.volume_popup.is_active):
+            self._app.volume_popup.show_popup()
             return
 
         """
@@ -206,6 +206,10 @@ class MediaInfoPopup(BasePopup):
         """
         asyncio.create_task(self._show_popup_async())
 
+    def _get_duration(self):
+        return config.media_window.duration.value \
+            if config.media_window.override_duration.value else config.common.popup_duration.value
+    
     async def _show_popup_async(self):
         """Асинхронная загрузка медиа-информации с обложкой."""
         try:
@@ -215,8 +219,8 @@ class MediaInfoPopup(BasePopup):
             print(f"[MediaInfoPopup] Ошибка при загрузке: {e}")
         
         # Обновляем UI (всё ещё в основном потоке — безопасно)
-        self.title_label.setText(info["title"])
-        self.artist_label.setText(info["artist"])
+        self._title_label.setText(info["title"])
+        self._artist_label.setText(info["artist"])
     
         if info.get("cover_bytes"):
             self._set_cover_from_bytes(info["cover_bytes"])
@@ -231,8 +235,8 @@ class MediaInfoPopup(BasePopup):
         self._set_background_color()
 
     def _update_timeline(self):
-        if not self._session or not self.app.config.media_window_show_timeline:
-            self.timeline.set_progress(0.0)
+        if not self._session or not config.media_window.show_timeline.value:
+            self._timeline.set_progress(0.0)
             return
         
         try:
@@ -262,16 +266,16 @@ class MediaInfoPopup(BasePopup):
                 current = position
             
             progress = (current - start) / (end - start) if end else 0.0 
-            self.timeline.set_progress(progress)
+            self._timeline.set_progress(progress)
             
         except Exception as e:
             print(f"[MediaInfoPopup] Ошибка обновления состояния таймлайна: {e}")
 
     def _update_buttons(self):
         if not self._session:
-            self.prev_button.setEnabled(False)
-            self.play_pause_button.setEnabled(False)
-            self.next_button.setEnabled(False)
+            self._prev_button.setEnabled(False)
+            self._play_pause_button.setEnabled(False)
+            self._next_button.setEnabled(False)
             return
         
         try:
@@ -285,20 +289,20 @@ class MediaInfoPopup(BasePopup):
             next_enabled = playback_info.controls.is_next_enabled
 
             icon_name = "pause.png" if is_playing else "play.png"
-            icon_path = f"icons/{get_windows_theme()}/{icon_name}"
-            self.play_pause_button.setIcon(load_icon(icon_path, 1 if play_enabled else 0.5))
-            self.prev_button.setIcon(load_icon(f"icons/{get_windows_theme()}/prev.png", 1 if prev_enabled else 0.5))
-            self.next_button.setIcon(load_icon(f"icons/{get_windows_theme()}/next.png", 1 if next_enabled else 0.5))
+            icon_path = f"icons/{Utils.get_windows_theme()}/{icon_name}"
+            self._play_pause_button.setIcon(Utils.load_icon(icon_path, 1 if play_enabled else 0.5))
+            self._prev_button.setIcon(Utils.load_icon(f"icons/{Utils.get_windows_theme()}/prev.png", 1 if prev_enabled else 0.5))
+            self._next_button.setIcon(Utils.load_icon(f"icons/{Utils.get_windows_theme()}/next.png", 1 if next_enabled else 0.5))
             
-            self.prev_button.setEnabled(bool(playback_info.controls.is_previous_enabled))
-            self.play_pause_button.setEnabled(bool(playback_info.controls.is_play_pause_toggle_enabled))
-            self.next_button.setEnabled(bool(playback_info.controls.is_next_enabled))
+            self._prev_button.setEnabled(bool(playback_info.controls.is_previous_enabled))
+            self._play_pause_button.setEnabled(bool(playback_info.controls.is_play_pause_toggle_enabled))
+            self._next_button.setEnabled(bool(playback_info.controls.is_next_enabled))
     
         except Exception as e:
             print(f"[MediaInfoPopup] Ошибка обновления состояния кнопок: {e}")
-            self.prev_button.setEnabled(False)
-            self.play_pause_button.setEnabled(False)
-            self.next_button.setEnabled(False)
+            self._prev_button.setEnabled(False)
+            self._play_pause_button.setEnabled(False)
+            self._next_button.setEnabled(False)
 
     async def _get_media_info(self):
         """Получает метаданные и обложку текущей медиасессии."""
@@ -388,15 +392,15 @@ class MediaInfoPopup(BasePopup):
         painter.drawPixmap(0, 0, pixmap)
         painter.end()
 
-        self.cover_label.setPixmap(rounded_pixmap)
-        self.cover_label.setText("")  # убираем текст
+        self._cover_label.setPixmap(rounded_pixmap)
+        self._cover_label.setText("")  # убираем текст
 
         self._update_timeline_colors(pixmap)
         
     def _set_default_cover(self):
-        self.cover_label.setText("♪")
-        self.cover_label.setFont(QFont("Arial", 36))
-        self.cover_color = None
+        self._cover_label.setText("♪")
+        self._cover_label.setFont(QFont("Arial", 36))
+        self._cover_color = None
     
     def _update_timeline_colors(self, pixmap: QPixmap):
         avg_color = self._get_average_color(pixmap)
@@ -408,19 +412,19 @@ class MediaInfoPopup(BasePopup):
             # Сохраняем оттенок и насыщенность, устанавливаем L=128
             timeline_color = QColor.fromHsl(h, s, 128)
 
-        self.cover_color = timeline_color
+        self._cover_color = timeline_color
 
-        if self.app.config.media_window_color_by_cover:
-            theme = get_windows_theme()
+        if config.media_window.color_by_cover.value:
+            theme = Utils.get_windows_theme()
             if theme == "dark":
                 color = QColor("white")
             else:
                 color = QColor("black")
             color.setAlpha(20)
-            self.timeline.set_progress_color(color)
+            self._timeline.set_progress_color(color)
         else:
             timeline_color.setAlpha(35)
-            self.timeline.set_progress_color(timeline_color)
+            self._timeline.set_progress_color(timeline_color)
     
     def _get_average_color(self, pixmap: QPixmap, step: int = 5) -> QColor:
         """Возвращает усреднённый цвет изображения, анализируя каждый `step`-й пиксель."""
@@ -460,14 +464,14 @@ class MediaInfoPopup(BasePopup):
         return QColor(avg_r, avg_g, avg_b)
     
     def _set_background_color(self):
-        colors = get_theme_colors()
+        colors = Utils.get_theme_colors()
 
         bg = colors["bg"]
         border = colors["border"]
         
-        if self.app.config.media_window_color_by_cover and self.cover_color:
-            theme = get_windows_theme()
-            h, s, l, _ = self.cover_color.getHsl()
+        if config.media_window.color_by_cover.value and self._cover_color:
+            theme = Utils.get_windows_theme()
+            h, s, l, _ = self._cover_color.getHsl()
             if theme == "dark":
                 bg = QColor.fromHsl(h, s, 50).name()
             else:
@@ -521,8 +525,8 @@ class MediaInfoPopup(BasePopup):
                 self._playback_info_token = self._session.add_playback_info_changed(self._on_playback_info_changed)
                 if sender:
                     print("_on_current_session_changed")
-                    if self.isVisible() or self.app.config.media_window_show_on_change:
-                        self.app.loop.call_soon_threadsafe(self.show_popup)
+                    if self.isVisible() or config.media_window.show_on_change.value:
+                        self._app.call_soon_threadsafe(self.show_popup)
             else:
                 self._media_props_token = None
                 self._playback_info_token = None
@@ -532,13 +536,12 @@ class MediaInfoPopup(BasePopup):
     def _on_media_properties_changed(self, sender, args):
         """Вызывается при смене метаданных (трек, исполнитель, обложка)."""
         print("_on_media_properties_changed")
-        if self.isVisible() or self.app.config.media_window_show_on_change:
-            self.app.loop.call_soon_threadsafe(self.show_popup)
+        if self.isVisible() or config.media_window.show_on_change.value:
+            self._app.call_soon_threadsafe(self.show_popup)
         return 
     
     def _on_playback_info_changed(self, sender, args):
         """Вызывается при смене состояния (play/pause). Можно обновлять иконку кнопки."""
         if self.isVisible():
-            self.app.loop.call_soon_threadsafe(self._update_buttons)
-            #self.app.loop.call_soon_threadsafe(self.show_popup)
+            self._app.call_soon_threadsafe(self._update_buttons)
         return 

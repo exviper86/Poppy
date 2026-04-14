@@ -1,5 +1,3 @@
-# keyboard_handler.py
-
 # Copyright (C) 2025 exviper86
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
@@ -10,208 +8,146 @@
 #
 # You should have received a copy of the GNU General Public License along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import keyboard
+from PyQt6.QtCore import QTimer
+from .hooks import *
 import ctypes
+from .config import config
 
 user32 = ctypes.windll.user32
 
 class KeyboardHandler:
-    def __init__(self, app, on_layout_change_callback, on_lock_change_callback, on_volume_change_callback, on_media_change_callback):
-        self.app = app
+    def __init__(self):
+        from .app import App
+        self._app = App.instance()
         
-        self.ctrl_pressed = False
-        self.alt_pressed = False
-        self.shift_pressed = False
-        self.foreign_key_pressed = False
-        self.on_layout_change = on_layout_change_callback
-        self.on_lock_change = on_lock_change_callback
-        self.on_volume_change = on_volume_change_callback
-        self.on_media_change = on_media_change_callback
-        self.switch_device_hotkey = None
+        self._ctrl_pressed = False
+        self._alt_pressed = False
+        self._shift_pressed = False
+        self._foreign_key_pressed = False
+        self._switch_device_hotkey_id: int | None = None
         
-        self.caps_pressed = False
-        self.scroll_pressed = False
-        self.num_pressed = False
-        self.insert_pressed = False
-        
-        # Запускаем хуки
-        self.setup_hooks()
+        self._setup_hooks()
 
-    def setup_hooks(self):
+    def _setup_hooks(self):
         # --- Lock-клавиши ---
-        keyboard.hook_key('caps lock', self.on_caps_lock)
-        keyboard.hook_key('scroll lock', self.on_scroll_lock)
-        keyboard.hook_key('num lock', self.on_num_lock)
-        keyboard.hook_key('insert', self.on_insert)
+        keyboard.hook_hotkey([keys.caps_lock], lambda: self._on_lock_key("Caps"))
+        keyboard.hook_hotkey([keys.scroll_lock], lambda: self._on_lock_key("Scroll"))
+        keyboard.hook_hotkey([keys.num_lock], lambda: self._on_lock_key("Num"))
+        keyboard.hook_hotkey([keys.insert], lambda: self._on_lock_key("Insert"))
 
         # --- Модификаторы ---
-        keyboard.hook_key('ctrl', self.on_ctrl_event)
-        keyboard.hook_key('right ctrl', self.on_ctrl_event)
-        keyboard.hook_key('alt', self.on_alt_event)
-        keyboard.hook_key('right alt', self.on_alt_event)
-        keyboard.hook_key('shift', self.on_shift_event)
-        keyboard.hook_key('right shift', self.on_shift_event)
+        keyboard.hook_key(keys.left_ctrl, self._on_ctrl_event)
+        keyboard.hook_key(keys.right_ctrl, self._on_ctrl_event)
+        keyboard.hook_key(keys.left_alt, self._on_alt_event)
+        keyboard.hook_key(keys.right_alt, self._on_alt_event)
+        keyboard.hook_key(keys.left_shift, self._on_shift_event)
+        keyboard.hook_key(keys.right_shift, self._on_shift_event)
 
         # --- Громкость ---
-        keyboard.hook_key(-175, self.volume_buttons, suppress=True)  # Volume Up
-        keyboard.hook_key(-174, self.volume_buttons, suppress=True)  # Volume Down
-        keyboard.hook_key(-173, self.volume_buttons, suppress=True)  # Volume Mute
-
+        keyboard.hook_key(keys.volume_up, self._volume_buttons)
+        keyboard.hook_key(keys.volume_down, self._volume_buttons)
+        keyboard.hook_key(keys.volume_mute, self._volume_buttons)
+        
         # --- Мультимедиа ---
-        keyboard.hook_key(-179, self.media_buttons)  # Play/Pause
-        keyboard.hook_key(-176, self.media_buttons)  # Next Track
-        keyboard.hook_key(-177, self.media_buttons)  # Previous Track
+        keyboard.hook_key(keys.play_pause, self._media_buttons)
+        keyboard.hook_key(keys.next_track, self._media_buttons)
+        keyboard.hook_key(keys.previous_track, self._media_buttons)
 
         # --- Переключение устройства ---
-        self.set_switch_device_hotkey(self.app.config.audio_switch_hotkey_value)
+        self._set_switch_device_hotkey(config.audio_switch.hotkey_value.value)
+        config.audio_switch.hotkey_value.valueChanged.connect(self._set_switch_device_hotkey)
 
         # --- Все остальные клавиши ---
-        keyboard.hook(self.on_any_key)
+        keyboard.hook(self._on_any_key)
 
-    def set_switch_device_hotkey(self, hotkey: str):
-        if self.switch_device_hotkey:
-            keyboard.remove_hotkey(self.switch_device_hotkey)
+    def start(self):
+        if not keyboard.is_running:
+            keyboard.start()
 
-        if self.app.config.audio_switch_hotkey and hotkey:
-            keyboard.add_hotkey(hotkey, self.on_change_device, suppress=True, trigger_on_release=True)
-            self.switch_device_hotkey = hotkey
+    def stop(self):
+        if keyboard.is_running:
+            keyboard.stop()
+    
+    def _on_lock_key(self, lock_name: str):
+        self._app.call_soon_threadsafe(lambda: QTimer.singleShot(20, lambda: self._app.show_lock_popup(lock_name)))
 
-    def volume_buttons(self, e):
-        if not self.app.config.volume_window_enable:
+    def _show_layout(self):
+        self._app.call_soon_threadsafe(lambda: QTimer.singleShot(20, self._app.show_layout))
+
+    def _show_volume(self, callback: callable, device_changed: bool = False):
+        self._app.call_soon_threadsafe(callback)
+        self._app.call_soon_threadsafe(self._app.show_volume_popup, device_changed)
+    
+    def _set_switch_device_hotkey(self, hotkey: str):
+        if self._switch_device_hotkey_id:
+            keyboard.unhook_hotkey(self._switch_device_hotkey_id)
+            self._switch_device_hotkey_id = None
+        if hotkey:
+            self._switch_device_hotkey_id = keyboard.hook_hotkey(hotkey, self._on_change_device)
+    
+    def _volume_buttons(self, e: KeyEvent):
+        if not config.volume_window.enable.value:
             return True
         
-        if e.event_type == keyboard.KEY_DOWN:
-            if e.name == 'volume up':
-                self.app.audio_manager.volume_up()
-                self.on_volume_change(False)
-            elif e.name == 'volume down':
-                self.app.audio_manager.volume_down()
-                self.on_volume_change(False)
-            elif e.name == 'volume mute':
-                self.app.audio_manager.toggle_mute()
-                self.on_volume_change(False)
+        if e.event_type == KeyEventType.PRESS:
+            if e.key == keys.volume_up:
+                self._show_volume(self._app.audio_manager.volume_up)
+            elif e.key == keys.volume_down:
+                self._show_volume(self._app.audio_manager.volume_down)
+            elif e.key == keys.volume_mute:
+                self._show_volume(self._app.audio_manager.toggle_mute)
 
         return False  # Подавляем событие → системный попап не появится
 
-    def media_buttons(self, e):
-        if e.event_type == keyboard.KEY_DOWN:
-            self.on_media_change()
-        return True
-
-    # --- Обработчики Lock-клавиш ---
-    def on_caps_lock(self, e):
-        if e.name != "caps lock":
-            return
-        
-        if e.event_type == keyboard.KEY_DOWN:
-            if not self.caps_pressed:  # только если до этого не была нажата
-                self.caps_pressed = True
-                self.on_lock_change("Caps")
-        elif e.event_type == keyboard.KEY_UP:
-            self.caps_pressed = False
+    def _media_buttons(self, e: KeyEvent):
+        if e.event_type == KeyEventType.PRESS:
+            self._app.call_soon_threadsafe(self._app.show_media_popup)
     
-    def on_scroll_lock(self, e):
-        if e.name != "scroll lock":
-            return
-        
-        if e.event_type == keyboard.KEY_DOWN:
-            if not self.scroll_pressed:  # только если до этого не была нажата
-                self.scroll_pressed = True
-                self.on_lock_change("Scroll")
-        elif e.event_type == keyboard.KEY_UP:
-            self.scroll_pressed = False
-
-    def on_num_lock(self, e):
-        if e.name != "num lock":
-            return
-        
-        if e.event_type == keyboard.KEY_DOWN:
-            if not self.num_pressed:  # только если до этого не была нажата
-                self.num_pressed = True
-                self.on_lock_change("Num")
-        elif e.event_type == keyboard.KEY_UP:
-            self.num_pressed = False
-
-    def on_insert(self, e):
-        if e.name != "insert":
-            return 
-        
-        if e.event_type == keyboard.KEY_DOWN:
-            if not self.insert_pressed:  # только если до этого не была нажата
-                self.insert_pressed = True
-                self.on_lock_change("Insert")
-        elif e.event_type == keyboard.KEY_UP:
-            self.insert_pressed = False
-            
-
     # --- Обработчики модификаторов ---
-    def on_ctrl_event(self, e):
-        if e.event_type == keyboard.KEY_DOWN:
-            self.ctrl_pressed = True
-        elif e.event_type == keyboard.KEY_UP:
-            self.ctrl_pressed = False
-            if self.shift_pressed and not self.foreign_key_pressed:
-                self.on_layout_change()
-            self.foreign_key_pressed = False
+    def _on_ctrl_event(self, e: KeyEvent):
+        if e.event_type == KeyEventType.PRESS:
+            self._ctrl_pressed = True
+        elif e.event_type == KeyEventType.RELEASE:
+            if not self._ctrl_pressed:
+                return 
+            self._ctrl_pressed = False
+            if self._shift_pressed and not self._foreign_key_pressed:
+                self._show_layout()
+            self._foreign_key_pressed = False
 
-    def on_alt_event(self, e):
-        if e.event_type == keyboard.KEY_DOWN:
-            self.alt_pressed = True
-        elif e.event_type == keyboard.KEY_UP:
-            self.alt_pressed = False
-            if self.shift_pressed and not self.foreign_key_pressed:
-                self.on_layout_change()
-            self.foreign_key_pressed = False
+    def _on_alt_event(self, e: KeyEvent):
+        if e.event_type == KeyEventType.PRESS:
+            self._alt_pressed = True
+        elif e.event_type == KeyEventType.RELEASE:
+            if not self._alt_pressed:
+                return
+            self._alt_pressed = False
+            if self._shift_pressed and not self._foreign_key_pressed:
+                self._show_layout()
+            self._foreign_key_pressed = False
 
-    def on_shift_event(self, e):
-        if e.event_type == keyboard.KEY_DOWN:
-            self.shift_pressed = True
-        elif e.event_type == keyboard.KEY_UP:
-            self.shift_pressed = False
-            if (self.ctrl_pressed or self.alt_pressed) and not self.foreign_key_pressed:
-                self.on_layout_change()
-            self.foreign_key_pressed = False
+    def _on_shift_event(self, e: KeyEvent):
+        if e.event_type == KeyEventType.PRESS:
+            self._shift_pressed = True
+        elif e.event_type == KeyEventType.RELEASE:
+            if not self._shift_pressed:
+                return
+            self._shift_pressed = False
+            if (self._ctrl_pressed or self._alt_pressed) and not self._foreign_key_pressed:
+                self._show_layout()
+            self._foreign_key_pressed = False
     
-    def on_change_device(self):
-        self.app.audio_manager.switch_device()
-        self.on_volume_change(True)
-        return True
+    def _on_change_device(self):
+        if not config.audio_switch.hotkey.value:
+            return
+
+        self._show_volume(self._app.audio_manager.switch_device, True)
 
     # --- Обработчик любых клавиш ---
-    def on_any_key(self, e):
-        #print(e.name, e.scan_code)
-        if e.name in ('ctrl', 'right ctrl', 'shift', 'right shift', 'alt', 'right alt', 'caps lock', 'num lock', 'scroll lock', 'insert'):
+    def _on_any_key(self, e: KeyEvent):
+        if e.key.name in ('ctrl', 'right ctrl', 'shift', 'right shift', 'alt', 'right alt', 'caps lock', 'num lock', 'scroll lock', 'insert'):
             return
         
-        if e.event_type == keyboard.KEY_DOWN:
-            if (self.ctrl_pressed or self.alt_pressed) and self.shift_pressed:
-                self.foreign_key_pressed = True
-
-    def stop(self):
-        keyboard.unhook_all()
-    
-    def is_caps_lock_on(self):
-        """Возвращает True, если Caps Lock включён."""
-        state = user32.GetKeyState(VK_CAPS)
-        return (state & 0x0001) != 0
-    
-    def is_num_lock_on(self):
-        """Возвращает True, если Num Lock включён."""
-        state = user32.GetKeyState(VK_NUM)
-        return (state & 0x0001) != 0
-    
-    def is_scroll_lock_on(self):
-        """Возвращает True, если Scroll Lock включён."""
-        state = user32.GetKeyState(VK_SCROLL)
-        return (state & 0x0001) != 0
-    
-    def is_insert_on(self):
-        """Возвращает True, если Insert включён (режим вставки активен)."""
-        state = user32.GetKeyState(VK_INSERT)
-        return (state & 0x0001) != 0
-
-# Virtual Key Codes
-VK_CAPS = 0x14
-VK_NUM = 0x90
-VK_SCROLL  = 0x91
-VK_INSERT = 0x2D
+        if e.event_type == KeyEventType.PRESS:
+            if (self._ctrl_pressed or self._alt_pressed) and self._shift_pressed:
+                self._foreign_key_pressed = True
