@@ -2,7 +2,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QVBoxLayout
 from poppy.ui.fluent import Label, Font
 from ._base_page import BasePage
-from poppy.version import __version__
+from poppy.app_info import app_name, app_version
 from poppy.translations import localizer as loc, translations as trans
 
 class AboutPage(BasePage):
@@ -13,7 +13,7 @@ class AboutPage(BasePage):
         layout.setSpacing(0)
         
         # Заголовок
-        title_label = Label("Poppy", Font.title())
+        title_label = Label(app_name, Font.title())
         title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(title_label)
         
@@ -28,7 +28,7 @@ class AboutPage(BasePage):
         layout.addSpacing(16)
         
         # Версия
-        self.version_label = Label(f"Версия: {__version__}")
+        self.version_label = Label(f"Версия: {app_version}")
         self.version_label.setAlignment(Qt.AlignmentFlag.AlignRight)
         layout.addWidget(self.version_label)
 
@@ -62,4 +62,4 @@ class AboutPage(BasePage):
     def _update_text(self):
         self.setWindowTitle(loc.tr(trans.about_title))
         self.desc.setText(loc.tr(trans.about_info))
-        self.version_label.setText(f"{loc.tr(trans.about_version)} {__version__}")
+        self.version_label.setText(f"{loc.tr(trans.about_version)} {app_version}")

@@ -47,7 +47,7 @@ class ConfigOptionInt(BaseConfigOption):
     def __init__(self, key_name: str, default: int = 0):
         super().__init__(key_name)
         self._default_value = default
-        self._current_value = self._load_setting(self._key_name, default)
+        self._current_value = self._load(self._key_name, default)
 
     @property
     def value(self) -> int:
@@ -59,7 +59,10 @@ class ConfigOptionInt(BaseConfigOption):
 
     def save(self, value: int):
         super().save(value)
-        self._save_setting(self._key_name, value)
+        self._save_setting(self._key_name, str(value),  winreg.REG_SZ)
+        
+    def _load(self, key: str, default: int) -> int:
+        return int(self._load_setting(key, default))
 
 class ConfigOptionStr(BaseConfigOption):
     valueChanged = pyqtSignal(str)

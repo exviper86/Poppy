@@ -1,5 +1,3 @@
-from typing import Optional
-
 # Copyright (C) 2025 exviper86
 #
 # This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
@@ -12,6 +10,8 @@ from typing import Optional
 
 from PyQt6.QtWidgets import QSystemTrayIcon, QMenu
 from PyQt6.QtGui import QIcon, QAction, QFont
+from typing import Optional
+from .app_info import app_name
 from .utils import Utils
 from .config import config
 from .translations import localizer as loc, translations as trans
@@ -31,7 +31,7 @@ class TrayManager:
     def _create_tray_icon(self):
         icon_path = Utils.get_resource_path('icon.ico')
         tray_icon = QSystemTrayIcon(QIcon(icon_path), self._app)
-        tray_icon.setToolTip("Poppy")
+        tray_icon.setToolTip(app_name)
 
         # Создаём меню
         menu = QMenu()

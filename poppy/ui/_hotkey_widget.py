@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QHBoxLayout, QToolButton
+from PyQt6.QtWidgets import QHBoxLayout, QPushButton
 from poppy.ui import HotkeyEdit
 from poppy.ui.fluent import Widget, Card, Label
 from poppy.translations import localizer as loc, translations as trans
@@ -15,9 +15,9 @@ class HotkeyCard(Card):
         self._hotkey_edit = HotkeyEdit("нажмите...")
         hotkey_layout.addWidget(self._hotkey_edit, stretch=True)
 
-        self._clear_btn = QToolButton()
+        self._clear_btn = QPushButton()
         self._clear_btn.setText("Cбросить")
-        self._clear_btn.setFixedHeight(30)
+        self._clear_btn.setFixedHeight(31)
         self._clear_btn.clicked.connect(self._hotkey_edit.clear)
         hotkey_layout.addWidget(self._clear_btn)
 
@@ -25,8 +25,6 @@ class HotkeyCard(Card):
         hotkey_widget.setLayout(hotkey_layout)
     
         super().__init__(self._label, hotkey_widget)
-
-        self.setIdent(1)
         
         self._update_text()
         loc.language_changed.connect(self._update_text)

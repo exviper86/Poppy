@@ -9,8 +9,10 @@ class CardExpandAuto(CardExpand):
         self._switch = Switch()
         super().__init__(header, LabeledSwitchTr(self._switch))
 
-        self._switch.toggled.connect(self._on_switch_toggled)
         self._switch.setChecked(False)
+        self._on_switch_toggled(False)
+        
+        self._switch.toggled.connect(self._on_switch_toggled)
 
     def switch(self) -> Switch:
         return self._switch

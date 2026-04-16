@@ -11,6 +11,7 @@
 import asyncio
 
 import winsdk.windows.media.control as wmc
+PlaybackStatus = wmc.GlobalSystemMediaTransportControlsSessionPlaybackStatus
 from winsdk.windows.storage.streams import Buffer, InputStreamOptions
 from datetime import datetime, timezone
 from ._base_popup import BasePopup
@@ -71,8 +72,8 @@ class TimelineBar(QWidget):
 
 class MediaInfoPopup(BasePopup):
     def start(self):
-        self._session = None
-        self._session_manager = None
+        self._session: wmc.GlobalSystemMediaTransportControlsSession | None = None
+        self._session_manager: wmc.GlobalSystemMediaTransportControlsSessionManager | None = None
         self._session_changed_token = None
         self._media_props_token = None
         self._playback_info_token = None
@@ -245,7 +246,7 @@ class MediaInfoPopup(BasePopup):
             if not playback_info:
                 return
             
-            is_playing = playback_info.playback_status == wmc.GlobalSystemMediaTransportControlsSessionPlaybackStatus.PLAYING
+            is_playing = playback_info.playback_status == PlaybackStatus.PLAYING
             
             timeline = self._session.get_timeline_properties()
             if not timeline:
@@ -283,7 +284,7 @@ class MediaInfoPopup(BasePopup):
             if not playback_info:
                 return 
             
-            is_playing = playback_info.playback_status == wmc.GlobalSystemMediaTransportControlsSessionPlaybackStatus.PLAYING
+            is_playing = playback_info.playback_status == PlaybackStatus.PLAYING
             prev_enabled = playback_info.controls.is_previous_enabled
             play_enabled = playback_info.controls.is_play_pause_toggle_enabled
             next_enabled = playback_info.controls.is_next_enabled
@@ -520,6 +521,9 @@ class MediaInfoPopup(BasePopup):
 
             # Подписываемся на новую сессию
             self._session = self._session_manager.get_current_session()
+            #self._session = self._get_active_session()
+            print(self._session.source_app_user_model_id)
+            
             if self._session:
                 self._media_props_token = self._session.add_media_properties_changed(self._on_media_properties_changed)
                 self._playback_info_token = self._session.add_playback_info_changed(self._on_playback_info_changed)
@@ -533,10 +537,19 @@ class MediaInfoPopup(BasePopup):
         except Exception as e:
             print(f"[MediaInfoPopup] Ошибка смены сессии: {e}")
     
+    # def _get_active_session(self):
+    #     for session in self._session_manager.get_sessions():
+    #         if session.get_playback_info().playback_status == PlaybackStatus.PLAYING:
+    #             return session
+    # 
+    #     return self._session_manager.get_current_session()
+    
     def _on_media_properties_changed(self, sender, args):
         """Вызывается при смене метаданных (трек, исполнитель, обложка)."""
         print("_on_media_properties_changed")
-        if self.isVisible() or config.media_window.show_on_change.value:
+        # if self.isVisible() or config.media_window.show_on_change.value:
+        #     self._app.call_soon_threadsafe(self.show_popup)
+        if self.isVisible():
             self._app.call_soon_threadsafe(self.show_popup)
         return 
     

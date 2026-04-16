@@ -33,6 +33,10 @@ class LayoutSwitcher:
         self.set_switch_last_hotkey(config.layout_switch.last_hotkey.value)
         self.set_switch_selected_hotkey(config.layout_switch.selected_hotkey.value)
         self.set_switch_case_hotkey(config.layout_switch.case_hotkey.value)
+        
+        config.layout_switch.last_hotkey.valueChanged.connect(self.set_switch_last_hotkey)
+        config.layout_switch.selected_hotkey.valueChanged.connect(self.set_switch_selected_hotkey)
+        config.layout_switch.case_hotkey.valueChanged.connect(self.set_switch_case_hotkey)
     
     def start(self):
         if not keyboard.is_running:

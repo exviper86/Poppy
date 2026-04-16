@@ -4,7 +4,6 @@ from PyQt6.QtWidgets import QWidget, QGridLayout, QToolButton, QSizePolicy
 from poppy.ui.fluent import PaletteChangeListener
 from poppy.utils import Utils
 
-
 class PositionGrid(QWidget, PaletteChangeListener):
     positionChanged = pyqtSignal(str)
 
@@ -89,7 +88,7 @@ class PositionGrid(QWidget, PaletteChangeListener):
                 background-color: {"#0F808080" if is_dark_theme else "#5FFFFFFF"};
             }}
             QToolButton:disabled:checked {{
-                background-color: { Utils.color_with_alpha(palette.accent().color().name(), 128) };
+                background-color: {"#656565" if is_dark_theme else "#B9B9B9"};
             }}
         """)
 

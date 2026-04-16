@@ -320,12 +320,12 @@ class Translations():
         self._add(self.lang_en, self.about_info,
             "A system utility for Windows: displays pop-up hints on switching keyboard layout, "
             "pressing keyboard mode keys, changing volume, shows and controls media info, "
-            "and features an advanced audio device switching system."
+            "features an advanced audio device and keyboard layout switching system"
         )
         self._add(self.lang_ru, self.about_info, 
             "Системный инструмент для Windows: показывает всплывающие подсказки при переключении раскладки, "
             "нажатии клавиш режима клавиатуры, изменении громкости, отображает и управляет медиаданными, "
-            "и имеет продвинутую систему переключения аудиоустройств"
+            "имеет продвинутую систему переключения аудиоустройств и раскладки клавиатуры"
         )
         
         self._add(self.lang_en, self.about_version, "Version:")
@@ -340,6 +340,7 @@ class Translations():
         self.help_volume_title = "help_volume_title"
         self.help_media_title = "help_media_title"
         self.help_audio_switch_title = "help_audio_switch_title"
+        self.help_layout_switch_title = "help_layout_switch_title"
         self.help_tips_title = "help_tips_title"
     
         # Содержимое секций
@@ -347,6 +348,7 @@ class Translations():
         self.help_volume = "help_volume"
         self.help_media = "help_media"
         self.help_audio_switch = "help_audio_switch"
+        self.help_layout_switch = "help_layout_switch"
         self.help_tips = "help_tips"
     
         # --- Русский ---
@@ -358,7 +360,8 @@ class Translations():
         self._add(self.lang_ru, self.help_keyboard_title, "Клавиатура")
         self._add(self.lang_ru, self.help_volume_title, "Громкость")
         self._add(self.lang_ru, self.help_media_title, "Мультимедиа")
-        self._add(self.lang_ru, self.help_audio_switch_title, "Переключение аудио")
+        self._add(self.lang_ru, self.help_audio_switch_title, "Переключение аудио устройств")
+        self._add(self.lang_ru, self.help_layout_switch_title, "Переключение раскладки клавиатуры")
         self._add(self.lang_ru, self.help_tips_title, "Советы")
     
         self._add(self.lang_ru, self.help_keyboard,
@@ -387,6 +390,12 @@ class Translations():
                   "• Переключать можно по всем подключенным устройствам или только по выбраным.\n"
                   "• Если выбрана опция «Только среди выбранных устройств», можно привязать входное устройство (микрофон) для каждого аудиоустройства.\n"
                   )
+        self._add(self.lang_ru, self.help_layout_switch,
+                  "• Можно переключить раскладку последнего слова.\n"
+                  "• Можно выбрать опцию, чтобы раскладка переключалась, даже если нет последнего слова.\n"
+                  "• Можно переключить раскладку выделенного текста, только если в нем символы одного языка.\n"
+                  "• Можно переключить регистр выделенного текста.\n"
+                  )
         self._add(self.lang_ru, self.help_tips,
                   "💡 Советы:\n"
                   "• Чтобы сбросить горячую клавишу — нажмите Esc в поле ввода.\n"
@@ -404,7 +413,8 @@ class Translations():
         self._add(self.lang_en, self.help_keyboard_title, "Keyboard")
         self._add(self.lang_en, self.help_volume_title, "Volume")
         self._add(self.lang_en, self.help_media_title, "Media")
-        self._add(self.lang_en, self.help_audio_switch_title, "Audio Switching")
+        self._add(self.lang_en, self.help_audio_switch_title, "Audio devices switching")
+        self._add(self.lang_en, self.help_layout_switch_title, "Keyboard layout switching")
         self._add(self.lang_en, self.help_tips_title, "Tips")
 
         self._add(self.lang_en, self.help_keyboard,
@@ -433,6 +443,11 @@ class Translations():
                   "• You can switch between all connected devices or only selected ones.\n"
                   "• If 'Only among selected devices' is enabled, you can assign an input device (microphone) to each output device."
                   )
+        self._add(self.lang_en, self.help_layout_switch,
+                  "• You can switch the keyboard layout of the last word.\n"
+                  "• You can enable an option to switch the layout even if there is no last word.\n"
+                  "• You can switch the layout of selected text, but only if it contains characters from a single language.\n"
+                  "• You can toggle the case of selected text.\n")
         self._add(self.lang_en, self.help_tips,
                   "💡 Tips:\n"
                   "• To clear a hotkey, press Esc in the input field.\n"

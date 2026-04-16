@@ -22,9 +22,10 @@ def is_already_running():
     return False
 
 def show_already_running_message():
+    from poppy.app_info import app_name
     win32gui.MessageBox(
         0,
-        "Poppy is already running in the background.\nCheck the system tray.",
+        f"{app_name} is already running in the background.\nCheck the system tray.",
         "Already running",
         win32con.MB_ICONWARNING
     )

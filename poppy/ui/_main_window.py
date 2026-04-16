@@ -1,4 +1,4 @@
-from PyQt6.QtCore import QSize
+from PyQt6.QtCore import QSize, Qt
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QVBoxLayout
 from poppy.ui.fluent import Label, FluentMainWindow, NavigationView, Font
@@ -7,12 +7,18 @@ from poppy.ui.fluent import NavigationViewItem
 from poppy.ui.pages import GeneralPage, KeyboardPage, VolumePage, MultimediaPage, HelpPage, AudioSwitchPage, LayoutSwitchPage
 from poppy.ui.pages import AboutPage
 from poppy.utils import Utils
+from poppy.app_info import app_name
+from poppy.config import config
 
 class MainWindow(FluentMainWindow):
     def __init__(self):        
         super().__init__()
 
-        self.resize(800, 564)
+        self.setWindowTitle(app_name)
+        
+        self.setMinimumSize(600, 400)
+        self.setWindowFlags(Qt.WindowType.CustomizeWindowHint | Qt.WindowType.WindowMinimizeButtonHint | Qt.WindowType.WindowCloseButtonHint)
+        self._load_window_geometry()
         
         self._init()
 
@@ -73,6 +79,27 @@ class MainWindow(FluentMainWindow):
         selected_item = self._navigation.selectedItem()
         if selected_item:
             self._header.setText(selected_item.text().strip())
+    
+    def _load_window_geometry(self):
+        x = config.main_window.x.value
+        y = config.main_window.y.value
+        width = config.main_window.width.value
+        height = config.main_window.height.value
         
+        if width == 0 or height == 0:
+            self.resize(800, 564)
+            return 
         
-        
+        self.move(x, y)
+        self.resize(width, height)
+    
+    def _save_window_geometry(self):
+        config.main_window.x.save(self.x())
+        config.main_window.y.save(self.y())
+        config.main_window.width.save(self.width())
+        config.main_window.height.save(self.height())
+    
+    def closeEvent(self, event):
+        """Handle window close events"""
+        self._save_window_geometry()
+        super().closeEvent(event)

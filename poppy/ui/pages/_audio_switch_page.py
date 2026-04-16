@@ -158,6 +158,7 @@ class AudioSwitchPage(BasePage):
         layout.addWidget(self._hotkey_card)
 
         self._hotkey_value_card = HotkeyCard()
+        self._hotkey_value_card.setIdent(1)
         self._hotkey_value_card.hotkeyEdit().setFixedWidth(self._input_width)
         layout.addWidget(self._hotkey_value_card)
 

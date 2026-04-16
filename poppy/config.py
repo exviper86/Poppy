@@ -60,7 +60,7 @@ class LayoutSwitchConfig:
         self.selected_hotkey: cStr = cStr(name + "SelectedHotkey", "shift+pause")
         self.case: cBool = cBool(name + "Case", False)
         self.case_hotkey: cStr = cStr(name + "CaseHotkey", "alt+pause")
-        self.block_locks: cBool = cBool(name + "BlockLocks", False)
+        #self.block_locks: cBool = cBool(name + "BlockLocks", False)
 
 class CommonConfig:
     def __init__(self, name: str = ""):
@@ -72,6 +72,13 @@ class CommonConfig:
         self.language: cStr = cStr(name + "Language", "en")
         self.autostart: cAutoStart = cAutoStart(name + "Poppy")
 
+class MainWindowConfig:
+    def __init__(self, name: str):
+        self.x: cInt = cInt(name + "X", 0)
+        self.y: cInt = cInt(name + "Y", 0)
+        self.width: cInt = cInt(name + "Width", 0)
+        self.height: cInt = cInt(name + "Height", 0)
+
 class Config:
     def __init__(self):
         self.keyboard_window: KeyboardWindowConfig = KeyboardWindowConfig("KeyboardWindow")
@@ -79,6 +86,7 @@ class Config:
         self.media_window: MediaWindowConfig = MediaWindowConfig("MediaWindow")
         self.audio_switch: AudioSwitchConfig = AudioSwitchConfig("AudioSwitch")
         self.layout_switch: LayoutSwitchConfig = LayoutSwitchConfig("LayoutSwitch")
+        self.main_window: MainWindowConfig = MainWindowConfig("MainWindow")
         self.common: CommonConfig = CommonConfig()
         
 config: Config = Config()

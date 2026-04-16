@@ -53,6 +53,15 @@ class FluentWindow(QWidget, PaletteChangeListener):
             background-color: {"#22808080" if is_dark_theme else "#BEFFFFFF"};
             padding: 3 8 3 8;
         }}
+        QPushButton {{
+            background-color: {"#22808080" if is_dark_theme else "#BEFFFFFF"};
+        }}
+        QPushButton:hover {{
+            background-color: {"#44808080" if is_dark_theme else "#F5F5F5"};
+        }}
+        QPushButton:pressed {{
+            background-color: {"#15808080" if is_dark_theme else "#F5F5F5"};
+        }}
         """)
 
         # QLineEdit {{
@@ -62,9 +71,9 @@ class FluentWindow(QWidget, PaletteChangeListener):
 
 class FluentMainWindow(FluentWindow):
     def __init__(self, parent: QWidget = None):
-        super().__init__(parent)
-
         QApplication.setFont(Font.label())
+        
+        super().__init__(parent)
         
         self._updating_palette = False
         self._update_palette(QApplication.palette())
