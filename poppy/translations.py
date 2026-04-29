@@ -172,6 +172,8 @@ class Translations():
         self.media_enable = "media_enable"
         self.media_show_volume = "media_show_volume"
         self.media_show_on_change = "media_show_on_change"
+        self.media_show_cover = "media_show_cover"
+        self.media_show_buttons = "media_show_buttons"
         self.media_show_timeline = "media_show_timeline"
         self.media_color_by_cover = "media_color_by_cover"
 
@@ -183,10 +185,16 @@ class Translations():
 
         self._add(self.lang_en, self.media_show_on_change, "Show on track change")
         self._add(self.lang_ru, self.media_show_on_change, "Показывать при смене трека")
-
+        
+        self._add(self.lang_en, self.media_show_cover, "Show track cover")
+        self._add(self.lang_ru, self.media_show_cover, "Показывать обложку трека")
+        
         self._add(self.lang_en, self.media_show_timeline, "Show track timeline")
         self._add(self.lang_ru, self.media_show_timeline, "Показывать прогресс трека")
 
+        self._add(self.lang_en, self.media_show_buttons, "Show media buttons")
+        self._add(self.lang_ru, self.media_show_buttons, "Показывать медиа кнопки")
+        
         self._add(self.lang_en, self.media_color_by_cover, "Color popup by cover")
         self._add(self.lang_ru, self.media_color_by_cover, "Красить окно в цвет обложки")
 
@@ -288,6 +296,7 @@ class Translations():
     
     def _add_layout_switch_translations(self):
         self.layout_switch_last = "layout_switch_last" 
+        self.layout_switch_spaces = "layout_switch_spaces"
         self.layout_switch_if_no_last = "layout_switch_if_no_last"
         self.layout_switch_selected = "layout_switch_selected"
         self.layout_switch_case = "layout_switch_case"
@@ -295,7 +304,10 @@ class Translations():
 
         self._add(self.lang_en, self.layout_switch_last, "Switch last typed word layout")
         self._add(self.lang_ru, self.layout_switch_last, "Смена раскладки последнего набранного слова")
-
+        
+        self._add(self.lang_en, self.layout_switch_spaces, "Consider spaces")
+        self._add(self.lang_ru, self.layout_switch_spaces, "Учитывать пробелы")
+        
         self._add(self.lang_en, self.layout_switch_if_no_last, "Switch layout even if there is no last word")
         self._add(self.lang_ru, self.layout_switch_if_no_last, "Переключать раскладку, даже если нет последнего слова")
         

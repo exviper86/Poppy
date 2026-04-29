@@ -13,15 +13,7 @@ from pycaw.pycaw import AudioUtilities
 from .config import config
 
 class AudioManager:
-    def __init__(self):
-        self._current_audio_index = 0
-        
-        devices = self._get_all_audio_interfaces()
-        for i, device in enumerate(devices):
-            if device.FriendlyName == self._get_current_audio_interface().FriendlyName:
-                self._current_audio_index = i
-                break
-                
+
     def volume_up(self) -> int:
         volume = self._get_current_audio_interface().EndpointVolume
         step = config.volume_window.step.value
@@ -80,6 +72,11 @@ class AudioManager:
         
         device_ids = {dev["id"] for dev in devices}
         
+        index = -1
+        dev_id = None
+        mic_id = None
+        current_id = self._get_current_audio_interface().id
+        
         if config.audio_switch.select.value:
             enabled_devices = []
             for device in config.audio_switch.devices.value:
@@ -89,24 +86,34 @@ class AudioManager:
             if len(enabled_devices) == 0:
                 return
             
-            dev_id = None
-            mic_id = None
             if device_id is not None:
-                for i, dev in enumerate(enabled_devices):
+                for dev in enabled_devices:
                     if dev["id"] == device_id:
-                        self._current_audio_index = i
                         dev_id = dev["id"]
                         mic_id = dev["mic"]
                         break
             else:
-                self._current_audio_index = (self._current_audio_index + 1) % len(enabled_devices)
-                dev = enabled_devices[self._current_audio_index]
+                for i, device in enumerate(enabled_devices):
+                    if device["id"] == current_id:
+                        index = i
+                        break
+                index = (index + 1) % len(enabled_devices)
+                dev = enabled_devices[index]
                 dev_id = dev["id"]
                 mic_id = dev["mic"]
         else:
-            self._current_audio_index = (self._current_audio_index + 1) % len(devices)
-            dev_id = devices[self._current_audio_index]["id"]
-            mic_id = None
+            if device_id is not None:
+                for dev in devices:
+                    if dev["id"] == device_id:
+                        dev_id = dev["id"]
+                        break
+            else:
+                for i, device in enumerate(devices):
+                    if device["id"] == current_id:
+                        index = i
+                        break
+                index = (index + 1) % len(devices)
+                dev_id = devices[index]["id"]
         
         roles = [ERole.eConsole, ERole.eCommunications] if config.audio_switch.set_communication.value else None
         if dev_id:

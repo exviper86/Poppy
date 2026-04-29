@@ -12,7 +12,6 @@ class BasePage(Page):
         self._linked_switches: dict[Switch, list[QWidget]] = {}
           
         self._slider_width = 150
-        self._input_width = 120
         
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -39,10 +38,6 @@ class BasePage(Page):
     @property
     def slider_width(self) -> int:
         return self._slider_width
-    
-    @property
-    def input_width(self) -> int:
-        return self._input_width
     
     @abstractmethod
     def _create_content(self, layout: QVBoxLayout):

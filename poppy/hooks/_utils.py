@@ -134,6 +134,8 @@ NAME_TO_MOUSE = {name: vk for vk, name in MOUSE_NAMES.items()}
 def get_vk(name: str) -> int | None:
     if name in ('shift', 'ctrl', 'alt', 'win'):
         name = f"left {name}"
+    if name.startswith("num "):
+        name = name.replace("num", "numpad")
     return NAME_TO_VK.get(name.lower()) or None
 
 def get_mouse(name: str) -> int | None:

@@ -35,7 +35,8 @@ def cleanup_mutex():
     if APP_MUTEX_HANDLE:
         try:
             win32api.CloseHandle(APP_MUTEX_HANDLE)
-        except Exception:
+        except Exception as e:
+            print(f"Ошибка закрытия mutex: {e}")
             pass
         APP_MUTEX_HANDLE = None
 
@@ -53,8 +54,8 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"Ошибка: {e}", file=sys.stderr)
     finally:
-        app.cleanup()
         cleanup_mutex()
+        app.cleanup()
         print("exit")
         # import os
         # os._exit(0)

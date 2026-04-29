@@ -54,8 +54,6 @@ class VolumePopup(BasePopup):
         main_layout.addWidget(self._device_label)
         main_layout.addLayout(content_layout)
         
-        self._origin_height = self.window_height
-        
     def _apply_theme_content(self, colors):
         self._icon_label.setStyleSheet(f"""
                 QToolButton {{
@@ -119,9 +117,6 @@ class VolumePopup(BasePopup):
         self._update_icon_by_volume(volume, self._app.audio_manager.get_mute())
 
         self._show_popup()
-
-        if config.volume_window.show_media.value and (not self._app.media_popup.isVisible() or not self._app.media_popup.is_active):
-            self._app.media_popup.show_popup()
             
     def _get_duration(self):
         return config.volume_window.duration.value \

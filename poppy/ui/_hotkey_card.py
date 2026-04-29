@@ -13,6 +13,7 @@ class HotkeyCard(Card):
         hotkey_layout.setSpacing(8)
 
         self._hotkey_edit = HotkeyEdit("нажмите...")
+        self._hotkey_edit.setFixedWidth(150)
         hotkey_layout.addWidget(self._hotkey_edit, stretch=True)
 
         self._clear_btn = QPushButton()

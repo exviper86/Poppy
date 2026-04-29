@@ -12,7 +12,7 @@ import asyncio
 
 import winsdk.windows.media.control as wmc
 PlaybackStatus = wmc.GlobalSystemMediaTransportControlsSessionPlaybackStatus
-from winsdk.windows.storage.streams import Buffer, InputStreamOptions
+from winsdk.windows.storage.streams import Buffer, InputStreamOptions, IRandomAccessStreamReference
 from datetime import datetime, timezone
 from ._base_popup import BasePopup
 from PyQt6.QtWidgets import QLabel, QVBoxLayout, QHBoxLayout, QToolButton, QWidget
@@ -27,7 +27,8 @@ class TimelineBar(QWidget):
         super().__init__(parent)
         self._progress = 0.0  # от 0.0 до 1.0
         self._background_color = QColor(255, 255, 255, 30)
-        self._progress_color = QColor(0, 120, 215)
+        self._progress_color = QColor.fromHsl(0, 0, 128)
+        self._progress_color.setAlpha(35)
         self._radius = 8
 
     def set_background_color(self, background: QColor):
@@ -78,9 +79,6 @@ class MediaInfoPopup(BasePopup):
         self._media_props_token = None
         self._playback_info_token = None
         
-        self._last_track = None
-        self._last_cover = None
-        
         asyncio.create_task(self._init_session_monitoring())
         
         self._timeline_timer = QTimer()
@@ -102,7 +100,6 @@ class MediaInfoPopup(BasePopup):
         self._cover_label.setFixedSize(80, 80)
         self._cover_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._set_default_cover()
-        #self._cover_label.setVisible(False)
     
         # Текст и кнопки (справа)
         right_layout = QVBoxLayout()
@@ -128,7 +125,7 @@ class MediaInfoPopup(BasePopup):
         self._prev_button = QToolButton()
         self._play_pause_button = QToolButton()
         self._next_button = QToolButton()
-    
+        
         # Устанавливаем минимальный размер и стиль
         for btn in (self._prev_button, self._play_pause_button, self._next_button):
             btn.setFixedSize(50, 35)
@@ -139,11 +136,12 @@ class MediaInfoPopup(BasePopup):
         buttons_layout.addWidget(self._next_button)
     
         # Собираем правую часть
+        right_layout.addStretch()
         right_layout.addWidget(self._title_label)
         right_layout.addWidget(self._artist_label)
         right_layout.addLayout(buttons_layout)
-        #right_layout.addStretch()
-    
+        right_layout.addStretch()
+        
         # Основной layout
         main_layout.addWidget(self._cover_label)
         main_layout.addLayout(right_layout)
@@ -197,16 +195,12 @@ class MediaInfoPopup(BasePopup):
         if not self._session:
             return 
 
-        if config.media_window.show_volume.value and (not self._app.volume_popup.isVisible() or not self._app.volume_popup.is_active):
-            self._app.volume_popup.show_popup()
-            return
-
         """
         Синхронная обёртка для обратной совместимости.
         Запускает асинхронную загрузку без блокировки GUI.
         """
         asyncio.create_task(self._show_popup_async())
-
+    
     def _get_duration(self):
         return config.media_window.duration.value \
             if config.media_window.override_duration.value else config.common.popup_duration.value
@@ -227,9 +221,17 @@ class MediaInfoPopup(BasePopup):
             self._set_cover_from_bytes(info["cover_bytes"])
         else:
             self._set_default_cover()
-
+        
         self._update_timeline()
         self._update_buttons()
+
+        self._cover_label.setVisible(config.media_window.show_cover.value)
+
+        if not self.isVisible():
+            full_size = config.media_window.show_cover.value or config.media_window.show_buttons.value 
+            self._window_height = self._origin_height if full_size else 56
+            self.setFixedHeight(self.window_height)
+            self._timeline.resize(self.window_width, self.window_height)
         
         self._show_popup()
         
@@ -273,6 +275,16 @@ class MediaInfoPopup(BasePopup):
             print(f"[MediaInfoPopup] Ошибка обновления состояния таймлайна: {e}")
 
     def _update_buttons(self):
+        if not config.media_window.show_buttons.value:
+            self._prev_button.setVisible(False)
+            self._play_pause_button.setVisible(False)
+            self._next_button.setVisible(False)
+            return
+
+        self._prev_button.setVisible(True)
+        self._play_pause_button.setVisible(True)
+        self._next_button.setVisible(True)
+        
         if not self._session:
             self._prev_button.setEnabled(False)
             self._play_pause_button.setEnabled(False)
@@ -318,24 +330,16 @@ class MediaInfoPopup(BasePopup):
 
             title = media_properties.title or "Без названия"
             artist = media_properties.artist or "Неизвестен"
-            track = title + artist
+            cover_bytes = None
             
-            if self._last_track != track:
-                self._last_track = track
-                self._last_cover = None
-                
-            if not self._last_cover:
-                cover_bytes = None
-                thumbnail = media_properties.thumbnail
-                if thumbnail:
-                    cover_bytes = await self._read_thumbnail(thumbnail)
-                self._last_cover = cover_bytes
-
+            thumbnail = media_properties.thumbnail
+            if thumbnail:
+                cover_bytes = await self._read_thumbnail(thumbnail)
 
             return {
                 "title": title,
                 "artist": artist,
-                "cover_bytes": self._last_cover
+                "cover_bytes": cover_bytes
             }
 
         except Exception as e:
@@ -399,9 +403,13 @@ class MediaInfoPopup(BasePopup):
         self._update_timeline_colors(pixmap)
         
     def _set_default_cover(self):
-        self._cover_label.setText("♪")
+        #self._cover_label.setText("♪")
+        self._cover_label.setText("♫")
         self._cover_label.setFont(QFont("Arial", 36))
         self._cover_color = None
+        color = QColor.fromHsl(0, 0, 128)
+        color.setAlpha(35)
+        self._timeline.set_progress_color(color)
     
     def _update_timeline_colors(self, pixmap: QPixmap):
         avg_color = self._get_average_color(pixmap)
@@ -520,41 +528,40 @@ class MediaInfoPopup(BasePopup):
                 self._session.remove_playback_info_changed(self._playback_info_token)
 
             # Подписываемся на новую сессию
-            self._session = self._session_manager.get_current_session()
-            #self._session = self._get_active_session()
-            print(self._session.source_app_user_model_id)
+            #self._session = self._session_manager.get_current_session()
+            self._session = self._get_active_session()
             
             if self._session:
                 self._media_props_token = self._session.add_media_properties_changed(self._on_media_properties_changed)
                 self._playback_info_token = self._session.add_playback_info_changed(self._on_playback_info_changed)
                 if sender:
                     print("_on_current_session_changed")
-                    if self.isVisible() or config.media_window.show_on_change.value:
+                    if self.isVisible() or (config.media_window.show_on_change.value and self._session.get_playback_info().playback_status == PlaybackStatus.PLAYING):
                         self._app.call_soon_threadsafe(self.show_popup)
+                print(self._session.source_app_user_model_id, self._session.get_playback_info().playback_status)
             else:
                 self._media_props_token = None
                 self._playback_info_token = None
         except Exception as e:
             print(f"[MediaInfoPopup] Ошибка смены сессии: {e}")
     
-    # def _get_active_session(self):
-    #     for session in self._session_manager.get_sessions():
-    #         if session.get_playback_info().playback_status == PlaybackStatus.PLAYING:
-    #             return session
-    # 
-    #     return self._session_manager.get_current_session()
+    def _get_active_session(self):
+        for session in self._session_manager.get_sessions():
+            if session.get_playback_info().playback_status == PlaybackStatus.PLAYING:
+                return session
+
+        return self._session_manager.get_current_session()
     
     def _on_media_properties_changed(self, sender, args):
         """Вызывается при смене метаданных (трек, исполнитель, обложка)."""
-        print("_on_media_properties_changed")
-        # if self.isVisible() or config.media_window.show_on_change.value:
-        #     self._app.call_soon_threadsafe(self.show_popup)
+        #print("_on_media_properties_changed", self._session.get_playback_info().playback_status)
         if self.isVisible():
             self._app.call_soon_threadsafe(self.show_popup)
         return 
     
     def _on_playback_info_changed(self, sender, args):
         """Вызывается при смене состояния (play/pause). Можно обновлять иконку кнопки."""
+        #print("_on_playback_info_changed", self._session.get_playback_info().playback_status)
         if self.isVisible():
             self._app.call_soon_threadsafe(self._update_buttons)
         return 

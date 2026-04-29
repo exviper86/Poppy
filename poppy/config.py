@@ -33,7 +33,9 @@ class MediaWindowConfig:
     def __init__(self, name: str):
         self.enable: cBool = cBool(name + "Enable", True)
         self.show_volume: cBool = cBool(name + "ShowVolume", False)
+        self.show_cover: cBool = cBool(name + "ShowCover", True)
         self.show_timeline: cBool = cBool(name + "ShowTimeline", True)
+        self.show_buttons: cBool = cBool(name + "ShowButtons", True)
         self.color_by_cover: cBool = cBool(name + "ColorByCover", False)
         self.show_on_change: cBool = cBool(name + "ShowOnChange", True)
         self.override_duration = cBool(name + "OverrideDuration", False)
@@ -55,6 +57,7 @@ class LayoutSwitchConfig:
     def __init__(self, name: str):
         self.last: cBool = cBool(name + "Last", False)
         self.last_hotkey: cStr = cStr(name + "LastHotkey", "pause")
+        self.consider_spaces: cBool = cBool(name + "ConsiderSpaces", True)
         self.no_last_switch: cBool = cBool(name + "NoLastSwitch", False)
         self.selected: cBool = cBool(name + "Selected", False)
         self.selected_hotkey: cStr = cStr(name + "SelectedHotkey", "shift+pause")

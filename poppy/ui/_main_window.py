@@ -42,6 +42,9 @@ class MainWindow(FluentMainWindow):
         
         layout.addWidget(self._navigation)
 
+        self._general = NavigationViewItem(GeneralPage, "Общие настройки", QIcon(Utils.load_icon("icons/settings.png")))
+        self._navigation.addItem(self._general)
+
         self._keyboard = NavigationViewItem(KeyboardPage, "Клавиатура", QIcon(Utils.load_icon("icons/keyboard.png")))
         self._navigation.addItem(self._keyboard)
 
@@ -50,9 +53,6 @@ class MainWindow(FluentMainWindow):
 
         self._multimedia = NavigationViewItem(MultimediaPage, "Мультимедиа", QIcon(Utils.load_icon("icons/multimedia.png")))
         self._navigation.addItem(self._multimedia)
-        
-        self._general = NavigationViewItem(GeneralPage, "Общие настройки", QIcon(Utils.load_icon("icons/settings.png")))
-        self._navigation.addItem(self._general)
 
         self._audio_switch = NavigationViewItem(AudioSwitchPage, "Аудио устройства", QIcon(Utils.load_icon("icons/audio_switch.png")))
         self._navigation.addItem(self._audio_switch)

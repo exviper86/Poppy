@@ -45,7 +45,7 @@ class HotkeyEdit(QLineEdit):
             parts.append("windows")
 
         # Основная клавиша
-        key_name = self._key_to_keyboard_name(key)
+        key_name = self._key_to_keyboard_name(key, True if modifiers & Qt.KeyboardModifier.KeypadModifier else False)
         if key_name:
             parts.append(key_name)
         else:
@@ -60,7 +60,7 @@ class HotkeyEdit(QLineEdit):
         else:
             self.clear()
 
-    def _key_to_keyboard_name(self, key: int) -> str:
+    def _key_to_keyboard_name(self, key: int, num: bool) -> str:
         """Преобразует Qt.Key в имя клавиши для библиотеки 'keyboard'."""
         # Буквы A-Z
         if Qt.Key.Key_A <= key <= Qt.Key.Key_Z:
@@ -68,7 +68,11 @@ class HotkeyEdit(QLineEdit):
 
         # Цифры 0-9 (верхний ряд)
         if Qt.Key.Key_0 <= key <= Qt.Key.Key_9:
-            return chr(ord('0') + (key - Qt.Key.Key_0))
+            return ("num " if num else "") + chr(ord('0') + (key - Qt.Key.Key_0))
+
+        # F1-F24
+        if Qt.Key.Key_F1 <= key <= Qt.Key.Key_F24:
+            return f"f{key - Qt.Key.Key_F1 + 1}"
 
         # Специальные клавиши
         key_map = {
@@ -94,21 +98,19 @@ class HotkeyEdit(QLineEdit):
             Qt.Key.Key_ScrollLock: "scroll lock",
             Qt.Key.Key_Comma: "comma",
             Qt.Key.Key_Period: "period",
-            Qt.Key.Key_Slash: "slash",
+            Qt.Key.Key_Slash: "slash" if not num else "num divide",
             Qt.Key.Key_Semicolon: "semicolon",
             Qt.Key.Key_Apostrophe: "quote",
             Qt.Key.Key_BracketLeft: "left bracket",
             Qt.Key.Key_BraceRight: "right bracket",
             Qt.Key.Key_Backslash: "backslash",
-            Qt.Key.Key_Minus: "minus",
+            Qt.Key.Key_Plus: "num add",
+            Qt.Key.Key_Minus: "minus" if not num else "num subtract",
+            Qt.Key.Key_Asterisk: "num multiply",
             Qt.Key.Key_Equal: "equal",
             Qt.Key.Key_QuoteLeft: "backquote",
         }
-
-        # F1-F24
-        if Qt.Key.Key_F1 <= key <= Qt.Key.Key_F24:
-            return f"f{key - Qt.Key.Key_F1 + 1}"
-
+        
         return key_map.get(key, "")
 
     def clear(self):

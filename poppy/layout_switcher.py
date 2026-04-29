@@ -130,7 +130,6 @@ class LayoutSwitcher:
                 keyboard.click_keystroke(ks)
             
             self._just_switched_last = True
-
         except Exception as e:
             print(e)
         finally:
@@ -143,11 +142,12 @@ class LayoutSwitcher:
             return
         
         self._is_busy = True
-
-        original = pyperclip.paste()
-        #print("original", original)
+        original: str | None = None
         
         try:
+            original = pyperclip.paste()
+            #print("original", original)
+            
             keyboard.release_key("left shift")
             keyboard.release_key("right shift")
             keyboard.release_key("left alt")
@@ -203,7 +203,8 @@ class LayoutSwitcher:
             print(e)
         finally:
             await asyncio.sleep(0.03)
-            pyperclip.copy(original)
+            if original:
+                pyperclip.copy(original)
             self._is_busy = False
     
     async def _switch_register_async(self):
@@ -213,11 +214,12 @@ class LayoutSwitcher:
             return
 
         self._is_busy = True
-
-        original = pyperclip.paste()
-        #print("original", original)
+        original: str | None = None
 
         try:
+            original = pyperclip.paste()
+            #print("original", original)
+            
             keyboard.release_key("left shift")
             keyboard.release_key("right shift")
             keyboard.release_key("left alt")
@@ -248,7 +250,8 @@ class LayoutSwitcher:
             print(e)
         finally:
             await asyncio.sleep(0.03)
-            pyperclip.copy(original)
+            if original:
+                pyperclip.copy(original)
             self._is_busy = False
 
     def _on_key(self, e: KeyEvent):
@@ -260,7 +263,7 @@ class LayoutSwitcher:
             return
 
         if e.key == keys.backspace:
-            if self._keys:
+            if len(self._keys) > 0:
                 self._keys.pop()
             return
 
@@ -268,11 +271,15 @@ class LayoutSwitcher:
             self._just_switched_last = False
             self._keys.clear()
 
-        if e.key in [keys.space, keys.enter, keys.esc, keys.tab, keys.left, keys.right, keys.up, keys.down,
+        if e.key in [keys.enter, keys.esc, keys.tab, keys.left, keys.right, keys.up, keys.down,
                      keys.delete, keys.home, keys.end, keys.page_up, keys.page_down]:
             self._keys.clear()
             return
-
+        
+        if not config.layout_switch.consider_spaces.value and e.key == keys.space:
+            self._keys.clear()
+            return
+        
         if self._is_printable(e.key):
             if keyboard.is_ctrl_pressed() or keyboard.is_alt_pressed():
                 self._keys.clear()  # это хоткей, не текст
@@ -296,7 +303,7 @@ class LayoutSwitcher:
     @staticmethod
     def _is_printable(key: Key) -> bool:
         # 1. Буквы (a-z) и цифры верхнего ряда (0-9) → их name односимвольный
-        if len(key.name) == 1:
+        if len(key.name) == 1 or key == keys.space:
             return True
     
         # 2. OEM-клавиши, которые печатают знаки препинания (их name — многосимвольный)

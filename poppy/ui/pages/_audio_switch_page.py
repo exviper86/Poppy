@@ -159,7 +159,6 @@ class AudioSwitchPage(BasePage):
 
         self._hotkey_value_card = HotkeyCard()
         self._hotkey_value_card.setIdent(1)
-        self._hotkey_value_card.hotkeyEdit().setFixedWidth(self._input_width)
         layout.addWidget(self._hotkey_value_card)
 
         self._set_communication_label = Label("Установливать и как устройство связи")

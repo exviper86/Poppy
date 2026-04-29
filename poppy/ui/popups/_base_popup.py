@@ -25,6 +25,8 @@ class BasePopup(QWidget):
         
         self._window_width = width
         self._window_height = height
+        self._origin_width = width
+        self._origin_height = height
         self._is_hide_animation = is_hide_animation
         self._stay_on_hover = stay_on_hover
 
@@ -179,8 +181,9 @@ class BasePopup(QWidget):
             self._update_screen_position()
             self.move(self._app.popup_manager.get_start_position(self))
             self.show()
-
-        self._app.popup_manager.update_popups(self)
+        
+        if self._order > -1:
+            self._app.popup_manager.update_popups(self)
 
         self._show_animation()
         

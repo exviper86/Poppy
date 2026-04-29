@@ -148,9 +148,18 @@ class App(QObject):
 
     def show_volume_popup(self, device_changed: bool = False):
         self._volume_popup.show_popup(device_changed)
+        
+        if device_changed:
+            return 
+        
+        if config.volume_window.show_media.value and (not self.media_popup.isVisible() or not self.media_popup.is_active):
+            self.media_popup.show_popup()
 
     def show_media_popup(self):
         self._media_popup.show_popup()
+
+        if config.media_window.show_volume.value and (not self.volume_popup.isVisible() or not self.volume_popup.is_active):
+            self.volume_popup.show_popup()
 
     def show_settings_window(self):
         if self._main_window.isVisible():
