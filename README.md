@@ -76,7 +76,7 @@ pip install -r requirements.txt
 ### Building an .exe
 If you want to distribute a standalone executable:
 ```bash
-pyinstaller --onefile --windowed --name Poppy --add-data "poppy/resources;resources" --icon="poppy/resources/icon.ico" poppy/main.py
+pyinstaller --onefile --windowed --name Poppy --add-data "poppy/resources;poppy/resources" --icon="poppy/resources/icon.ico" main.py
 ```
 or run build.bat
 
