@@ -222,7 +222,7 @@ class Translations():
         self._add(self.lang_en, self.animation_label, "Popup slide animation")
         self._add(self.lang_ru, self.animation_label, "Всплывающая анимация окна")
 
-        self._add(self.lang_en, self.taskbar_label, "Padding for taskbar_label")
+        self._add(self.lang_en, self.taskbar_label, "Padding for taskbar")
         self._add(self.lang_ru, self.taskbar_label, "Учитывать панель задач")
 
         self._add(self.lang_en, self.autostart_label, "Launch on system startup")

@@ -284,7 +284,11 @@ class LayoutSwitcher:
             if keyboard.is_ctrl_pressed() or keyboard.is_alt_pressed():
                 self._keys.clear()  # это хоткей, не текст
                 return
-
+            
+            last_space = len(self._keys) > 0 and self._keys[-1].vk == keys.space.vk
+            if config.layout_switch.consider_spaces.value and e.key != keys.space and last_space:
+                self._keys.clear()
+            
             shift_pressed = keyboard.is_shift_pressed()
             caps_on = keyboard.get_caps_lock()
             shifted = (shift_pressed and not caps_on) or (not shift_pressed and caps_on)
